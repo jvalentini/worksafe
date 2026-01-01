@@ -25,6 +25,13 @@ describe("detectIssues", () => {
     ]);
   });
 
+  test("does not flag common workplace terms like assess/assessment", () => {
+    expect(detectIssues("assess")).toEqual([]);
+    expect(detectIssues("assessment")).toEqual([]);
+    expect(detectIssues("assessing")).toEqual([]);
+    expect(detectIssues("assessments")).toEqual([]);
+  });
+
   test("preserves case when replacing", () => {
     expect(detectIssues("BULLSHIT")[0]?.replacement).toBe("NONSENSE");
     expect(detectIssues("Bullshit")[0]?.replacement).toBe("Nonsense");

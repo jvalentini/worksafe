@@ -19,9 +19,26 @@ export interface Detection {
   endIndex: number;
 }
 
+const baseDataset = englishDataset.build();
+
+const extraWhitelistedTerms = [
+  "assess",
+  "assessed",
+  "assesses",
+  "assessing",
+  "assessment",
+  "assessments",
+  "assessor",
+  "assessors",
+];
+
 const obscenityMatcher = new RegExpMatcher({
-  ...englishDataset.build(),
+  ...baseDataset,
   ...englishRecommendedTransformers,
+  whitelistedTerms: [
+    ...(baseDataset.whitelistedTerms ?? []),
+    ...extraWhitelistedTerms,
+  ],
 });
 
 const allWordReplacements: Record<string, string> = {
