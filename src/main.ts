@@ -104,6 +104,16 @@ function initSpeech(): void {
     },
     (status) => {
       voiceStatus.textContent = status;
+
+      const isListening = speechHandler?.getIsListening() ?? false;
+      recordBtn.classList.toggle("recording", isListening);
+
+      const recordText = recordBtn.querySelector(".record-text");
+      if (recordText) {
+        recordText.textContent = isListening
+          ? "Click to stop"
+          : "Click to speak";
+      }
     },
   );
 

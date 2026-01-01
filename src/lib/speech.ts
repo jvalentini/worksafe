@@ -50,6 +50,7 @@ export class SpeechHandler {
   private onTranscript: SpeechCallback;
   private onStatus: StatusCallback;
   private fullTranscript = "";
+  private pendingEndStatus: string | null = null;
 
   constructor(onTranscript: SpeechCallback, onStatus: StatusCallback) {
     this.onTranscript = onTranscript;
@@ -102,25 +103,53 @@ export class SpeechHandler {
     };
 
     this.recognition.onerror = (event: { error: string }) => {
-      console.error("Speech recognition error:", event.error);
+      const stopWithStatus = (status: string) => {
+        this.pendingEndStatus = status;
+        this.isListening = false;
+        this.recognition?.stop();
+      };
 
       if (event.error === "no-speech") {
+        console.warn("Speech recognition error:", event.error);
         this.onStatus("No speech detected. Try again.");
-      } else if (event.error === "audio-capture") {
-        this.onStatus("No microphone found. Check your settings.");
-      } else if (event.error === "not-allowed") {
-        this.onStatus("Microphone access denied. Please allow access.");
-      } else {
-        this.onStatus(`Error: ${event.error}`);
+        return;
       }
+
+      if (event.error === "audio-capture") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("No microphone found. Check your settings.");
+        return;
+      }
+
+      if (event.error === "not-allowed") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Microphone access denied. Please allow access.");
+        return;
+      }
+
+      if (event.error === "network") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition network error. Please try again.");
+        return;
+      }
+
+      console.error("Speech recognition error:", event.error);
+      stopWithStatus(`Error: ${event.error}`);
     };
 
     this.recognition.onend = () => {
       if (this.isListening) {
         this.recognition?.start();
-      } else {
-        this.onStatus("Ready");
+        return;
       }
+
+      if (this.pendingEndStatus) {
+        this.onStatus(this.pendingEndStatus);
+        this.pendingEndStatus = null;
+        return;
+      }
+
+      this.onStatus("Ready");
     };
 
     this.recognition.onstart = () => {
