@@ -92,7 +92,7 @@ AI mode uses `gpt-4o-mini` for fast, cost-effective rewrites.
 
 - **Runtime**: Bun
 - **Language**: TypeScript
-- **Build**: Vite
+- **Build**: Bun bundler (HTML entrypoint)
 - **Linting**: Biome + Oxlint
 - **Profanity Detection**: [obscenity](https://github.com/jo3-l/obscenity)
 - **Speech**: Web Speech API
@@ -102,9 +102,9 @@ AI mode uses `gpt-4o-mini` for fast, cost-effective rewrites.
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Start development server |
-| `bun run build` | Build for production |
-| `bun run preview` | Preview production build |
+| `bun run dev` | Start Bun dev server |
+| `bun run build` | Build static assets to `dist/` |
+| `bun run preview` | Serve `dist/` locally |
 | `bun run lint` | Run Biome and Oxlint |
 | `bun run lint:fix` | Auto-fix lint issues |
 | `bun run typecheck` | TypeScript type checking |
