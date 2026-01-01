@@ -1,0 +1,28 @@
+{
+  "name": "worksafe",
+  "version": "0.1.0",
+  "description": "Transform profanity and non-PC words into professional communication",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "biome check src && oxlint src",
+    "lint:fix": "biome check --write src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.10",
+    "@types/bun": "latest",
+    "oxlint": "^1.36.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@types/node": "^25.0.3",
+    "obscenity": "^0.4.5",
+    "vite": "^7.3.0"
+  }
+}
