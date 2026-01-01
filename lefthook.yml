@@ -1,0 +1,19 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{js,ts,jsx,tsx,json,css}"
+      run: bunx biome check --staged {staged_files}
+    oxlint:
+      glob: "*.{js,ts,jsx,tsx}"
+      run: bunx oxlint {staged_files}
+    typecheck:
+      run: bun run typecheck
+
+pre-push:
+  parallel: true
+  commands:
+    biome:
+      run: bun run lint
+    typecheck:
+      run: bun run typecheck

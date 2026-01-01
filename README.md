@@ -108,6 +108,7 @@ AI mode uses `gpt-4o-mini` for fast, cost-effective rewrites.
 | `bun run lint` | Run Biome and Oxlint |
 | `bun run lint:fix` | Auto-fix lint issues |
 | `bun run typecheck` | TypeScript type checking |
+| `bun run test` | Run unit tests |
 
 ## Privacy
 
