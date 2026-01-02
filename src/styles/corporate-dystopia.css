@@ -1,0 +1,419 @@
+/* ==========================================================================
+   CORPORATE DYSTOPIA DESIGN SYSTEM
+   WorkSafe - Professional Communications Division
+   Form WS-CSS-2024 Rev. 7
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   FONTS
+   -------------------------------------------------------------------------- */
+@import url("https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Special+Elite&family=IBM+Plex+Mono:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;500;600&display=swap");
+
+/* --------------------------------------------------------------------------
+   CSS CUSTOM PROPERTIES
+   -------------------------------------------------------------------------- */
+:root {
+  /* Paper & Background Colors */
+  --paper-white: #fdfcf9;
+  --paper-cream: #f8f5ef;
+  --paper-aged: #f3ede0;
+
+  /* Manila Folder Colors */
+  --manila: #e8d4a8;
+  --manila-light: #f0e4c8;
+  --manila-dark: #c9b48a;
+  --manila-border: #bfa97a;
+
+  /* Office Gray Palette */
+  --cubicle-gray: #6b6b6b;
+  --filing-cabinet: #8a8a8a;
+  --desk-gray: #a0a0a0;
+
+  /* Ink Colors */
+  --ink-black: #1a1a1a;
+  --ink-blue: #1a3a5c;
+  --typewriter-blue: #2c4a6e;
+  --rule-blue: #b8d4e8;
+
+  /* Accent Colors */
+  --postit-yellow: #fff740;
+  --postit-shadow: #e6dc00;
+  --highlighter-yellow: #fff59d;
+  --stamp-red: #c41e3a;
+  --danger-red: #b71c1c;
+  --approved-green: #2e7d32;
+  --coffee-stain: #8b6914;
+
+  /* Text Colors */
+  --text-primary: #1a1a1a;
+  --text-muted: #7a7a7a;
+
+  /* Typography */
+  --font-heading: "IBM Plex Mono", "Courier New", monospace;
+  --font-body: "Libre Baskerville", Georgia, serif;
+  --font-mono: "IBM Plex Mono", "Courier New", monospace;
+  --font-typewriter: "Courier Prime", "Courier New", monospace;
+  --font-stamp: "Special Elite", "Courier New", monospace;
+  --font-handwriting: "Caveat", cursive;
+  --font-serif: "Libre Baskerville", Georgia, serif;
+  --font-digital: "IBM Plex Mono", monospace;
+
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* --------------------------------------------------------------------------
+   RESET & BASE
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: #c5c0b8;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+
+  /* Subtle fabric/cubicle texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-blend-mode: overlay;
+}
+
+/* --------------------------------------------------------------------------
+   MAIN LAYOUT
+   -------------------------------------------------------------------------- */
+.office-container {
+  position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-md);
+  min-height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   DOCUMENT STYLING
+   -------------------------------------------------------------------------- */
+.document {
+  position: relative;
+  background: var(--paper-white);
+  border-radius: var(--radius-sm);
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.05),
+    0 2px 2px rgba(0, 0, 0, 0.05),
+    0 4px 4px rgba(0, 0, 0, 0.05),
+    0 8px 8px rgba(0, 0, 0, 0.05),
+    0 16px 16px rgba(0, 0, 0, 0.05),
+    0 32px 32px rgba(0, 0, 0, 0.05);
+  overflow: visible;
+
+  /* Paper texture */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23paper)'/%3E%3C/svg%3E");
+  background-blend-mode: soft-light;
+  padding: var(--spacing-lg);
+}
+
+/* Three-hole punch */
+.document-holes {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.hole {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #c5c0b8;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.document-body {
+  margin-left: 20px;
+}
+
+/* --------------------------------------------------------------------------
+   COFFEE STAINS
+   -------------------------------------------------------------------------- */
+.coffee-stain {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.coffee-stain-1 {
+  width: 80px;
+  height: 75px;
+  top: 120px;
+  right: -20px;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    var(--coffee-stain) 32%,
+    var(--coffee-stain) 38%,
+    transparent 40%,
+    transparent 60%,
+    var(--coffee-stain) 62%,
+    var(--coffee-stain) 68%,
+    transparent 70%
+  );
+  transform: rotate(-15deg);
+}
+
+.coffee-stain-2 {
+  width: 50px;
+  height: 45px;
+  bottom: 200px;
+  left: 30px;
+  background: radial-gradient(
+    ellipse at center,
+    var(--coffee-stain) 0%,
+    var(--coffee-stain) 25%,
+    transparent 35%
+  );
+  transform: rotate(25deg);
+}
+
+/* --------------------------------------------------------------------------
+   PAPER CLIP
+   -------------------------------------------------------------------------- */
+.paper-clip {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  width: 24px;
+  height: 60px;
+  border: 3px solid #b0b0b0;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+  transform: rotate(15deg);
+  z-index: 50;
+}
+
+.paper-clip::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 3px;
+  right: 3px;
+  height: 40px;
+  border: 3px solid #b0b0b0;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+}
+
+.paper-clip::after {
+  content: "";
+  position: absolute;
+  top: 16px;
+  left: 6px;
+  right: 6px;
+  height: 32px;
+  border: 3px solid #b0b0b0;
+  border-radius: 6px 6px 0 0;
+  border-bottom: none;
+}
+
+/* --------------------------------------------------------------------------
+   FILING CABINET DRAWER
+   -------------------------------------------------------------------------- */
+.filing-drawer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 120px;
+  height: 40px;
+  background: linear-gradient(to bottom, #7a7a7a, #5a5a5a);
+  border-radius: 4px;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.drawer-handle {
+  width: 30px;
+  height: 8px;
+  background: linear-gradient(to bottom, #999, #666);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.drawer-label {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: #ccc;
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER
+   -------------------------------------------------------------------------- */
+.document-footer {
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed var(--cubicle-gray);
+  text-align: center;
+}
+
+.document-footer p {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.document-footer .footer-small {
+  margin-top: 0.25rem;
+  font-size: 0.55rem;
+  opacity: 0.7;
+}
+
+/* --------------------------------------------------------------------------
+   ANIMATIONS
+   -------------------------------------------------------------------------- */
+@keyframes stamp-slam {
+  0% {
+    opacity: 0;
+    transform: scale(3) rotate(12deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(0.8) rotate(12deg);
+  }
+  100% {
+    transform: scale(1) rotate(12deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   RESPONSIVE
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .office-container {
+    padding: var(--spacing-md) var(--spacing-sm);
+  }
+
+  .document {
+    padding: var(--spacing-md);
+    border-radius: 0;
+  }
+
+  .document-holes {
+    display: none;
+  }
+
+  .document-body {
+    margin-left: 0;
+  }
+
+  .paper-clip {
+    display: none;
+  }
+
+  .coffee-stain {
+    display: none;
+  }
+
+  .filing-drawer {
+    bottom: 10px;
+    right: 10px;
+    width: 100px;
+    height: 32px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   SCROLLBAR STYLING
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--manila-dark);
+  border-radius: 5px;
+  border: 2px solid var(--paper-cream);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cubicle-gray);
+}
+
+/* --------------------------------------------------------------------------
+   SELECTION
+   -------------------------------------------------------------------------- */
+::selection {
+  background: var(--highlighter-yellow);
+  color: var(--ink-black);
+}
+
+/* --------------------------------------------------------------------------
+   FOCUS STYLES
+   -------------------------------------------------------------------------- */
+:focus-visible {
+  outline: 2px dashed var(--typewriter-blue);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   PRINT STYLES
+   -------------------------------------------------------------------------- */
+@media print {
+  body {
+    background: white;
+  }
+
+  .office-container {
+    padding: 0;
+  }
+
+  .document {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .filing-drawer,
+  .coffee-stain,
+  .paper-clip {
+    display: none;
+  }
+}
