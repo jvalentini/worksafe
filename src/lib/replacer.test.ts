@@ -230,6 +230,137 @@ describe("M3: adjacency scoring (pure function)", () => {
   });
 });
 
+describe("M3: passive-aggressive adjacency detection", () => {
+  test("detects 'just checking in' with extra words", () => {
+    const result = transformText("Just wanted to be checking in on this");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeDefined();
+    expect(paChange?.original.toLowerCase()).toContain("just");
+    expect(paChange?.original.toLowerCase()).toContain("checking");
+    expect(paChange?.original.toLowerCase()).toContain("in");
+  });
+
+  test("detects 'just checking in' with punctuation", () => {
+    const result = transformText("Just, um, checking... in");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeDefined();
+  });
+
+  test("detects 'per my last email' with extra words", () => {
+    const result = transformText("Per my very last email message");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeDefined();
+    expect(paChange?.original.toLowerCase()).toContain("per");
+    expect(paChange?.original.toLowerCase()).toContain("my");
+    expect(paChange?.original.toLowerCase()).toContain("last");
+    expect(paChange?.original.toLowerCase()).toContain("email");
+  });
+
+  test("detects 'per my last email' with punctuation", () => {
+    const result = transformText("Per my, uh, last email");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeDefined();
+  });
+
+  test("detects 'friendly reminder' with extra words", () => {
+    const result = transformText("Just a friendly little reminder");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeDefined();
+    expect(paChange?.original).toContain("friendly");
+    expect(paChange?.original).toContain("reminder");
+  });
+
+  test("does not detect when tokens are too far apart", () => {
+    const result = transformText(
+      "Just want to say something completely different before checking in",
+    );
+
+    const paChange = result.changes.find(
+      (c) =>
+        c.type === "passive-aggressive" &&
+        c.original.includes("just") &&
+        c.original.includes("checking"),
+    );
+    expect(paChange).toBeUndefined();
+  });
+
+  test("does not detect across protected tokens (URLs)", () => {
+    const result = transformText("Just https://example.com checking in");
+
+    const paChange = result.changes.find(
+      (c) =>
+        c.type === "passive-aggressive" &&
+        c.original.includes("just") &&
+        c.original.includes("checking"),
+    );
+    expect(paChange).toBeUndefined();
+  });
+
+  test("does not detect across protected tokens (@handles)", () => {
+    const result = transformText("Friendly @alice reminder");
+
+    const paChange = result.changes.find(
+      (c) =>
+        c.type === "passive-aggressive" &&
+        c.original.includes("friendly") &&
+        c.original.includes("reminder"),
+    );
+    expect(paChange).toBeUndefined();
+  });
+
+  test("does not detect in excluded zones (code blocks)", () => {
+    const result = transformText("```\nJust checking in\n```");
+
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeUndefined();
+  });
+
+  test("does not detect in excluded zones (quoted text)", () => {
+    const result = transformText("> Just checking in");
+
+    const paChange = result.changes.find(
+      (c) => c.type === "passive-aggressive",
+    );
+    expect(paChange).toBeUndefined();
+  });
+
+  test("existing exact phrase regex still works", () => {
+    const result = transformText("Per my last email, here is the info");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    expect(result.transformed).not.toContain("Per my last email");
+  });
+
+  test("existing friendly reminder regex still works", () => {
+    const result = transformText("Friendly reminder about the meeting");
+
+    expect(result.changeCount).toBeGreaterThanOrEqual(1);
+    expect(result.transformed).not.toContain("Friendly reminder");
+  });
+});
+
 describe("M3: adjacency-based clause rewrites (integration)", () => {
   test("triggers attack rewrite via adjacency (no exact phrase match)", () => {
     const result = transformText("You know what stupid");
