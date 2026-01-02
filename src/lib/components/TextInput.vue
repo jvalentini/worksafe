@@ -11,7 +11,7 @@
         class="tab-btn active"
         @click="emit('switch-mode', 'text')"
       >
-        ⌨️ TEXT INPUT
+        <img src="/stapler.png" alt="" class="tab-icon" /> TEXT INPUT
       </button>
     </div>
 
@@ -145,11 +145,22 @@ function handleTransform() {
   border-bottom: none;
   font-size: 1rem;
   padding-bottom: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .tab-btn:not(.active):hover {
   background: rgba(93,64,55,0.1);
   color: rgba(93,64,55,0.8);
+}
+
+.tab-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
 }
 
 .panel-content {

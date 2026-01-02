@@ -18,9 +18,6 @@
           />
         </div>
         
-        <!-- Pin backing -->
-        <div class="pin-backing"></div>
-        
         <!-- Center content -->
         <div class="flair-content">
           <div class="flair-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
@@ -185,34 +182,7 @@ function handleSaveKey() {
   filter: brightness(1.1);
 }
 
-.pin-backing {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 25px;
-  height: 40px;
-  background: linear-gradient(135deg, #c0c0c0 0%, #808080 50%, #606060 100%);
-  border-radius: 4px 4px 10px 10px;
-  box-shadow: 
-    inset 2px 2px 3px rgba(255,255,255,0.5),
-    inset -2px -2px 3px rgba(0,0,0,0.3),
-    0 6px 12px rgba(0,0,0,0.4);
-  z-index: 0;
-}
 
-.pin-backing::before {
-  content: '';
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 12px;
-  background: linear-gradient(180deg, #e0e0e0 0%, #909090 100%);
-  border-radius: 2px;
-  box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
-}
 
 .flair-content {
   position: absolute;

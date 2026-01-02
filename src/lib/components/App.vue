@@ -18,12 +18,6 @@
           class="flair-scattered flair-2"
         />
         <FlairBadge 
-          emoji="🔴" 
-          color="red" 
-          title="Swingline Stapler"
-          class="flair-scattered flair-3"
-        />
-        <FlairBadge 
           emoji="💼" 
           color="purple" 
           title="Case of the Mondays"
