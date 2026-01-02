@@ -25,7 +25,7 @@ const props = withDefaults(
   },
 );
 
-const _rotation = computed(() => {
+const rotation = computed(() => {
   if (props.rotate !== 0) return props.rotate;
   return Math.random() * 4 - 2;
 });

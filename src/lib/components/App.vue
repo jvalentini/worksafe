@@ -63,8 +63,14 @@
 <script setup lang="ts">
 import { onMounted } from "vue";
 import { initApp, inputMode } from "$lib/state";
+import TPSHeader from "./TPSHeader.vue";
+import PostItNote from "./PostItNote.vue";
+import VoiceInput from "./VoiceInput.vue";
+import TextInput from "./TextInput.vue";
+import SettingsPanel from "./SettingsPanel.vue";
+import OutputPanel from "./OutputPanel.vue";
 
-function _setInputMode(mode: "voice" | "text") {
+function setInputMode(mode: "voice" | "text") {
   inputMode.value = mode;
 }
 

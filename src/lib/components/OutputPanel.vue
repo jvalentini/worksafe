@@ -82,11 +82,12 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { transformedPlain, transformedEmail, changes } from "$lib/state";
 
 const outputMode = ref<"plain" | "email">("plain");
 const copied = ref(false);
 
-function _setMode(mode: "plain" | "email") {
+function setMode(mode: "plain" | "email") {
   outputMode.value = mode;
 }
 
@@ -94,7 +95,7 @@ function resetCopied() {
   copied.value = false;
 }
 
-async function _copyText(text: string) {
+async function copyText(text: string) {
   try {
     await navigator.clipboard.writeText(text);
     copied.value = true;

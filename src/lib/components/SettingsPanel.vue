@@ -50,15 +50,15 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { aiMode, saveApiKey } from "$lib/state";
+import { aiMode, saveApiKey, apiKey } from "$lib/state";
 
 const apiKeyInput = ref("");
 
-function _toggleAiMode() {
+function toggleAiMode() {
   aiMode.value = !aiMode.value;
 }
 
-function _handleSaveKey() {
+function handleSaveKey() {
   if (apiKeyInput.value.trim()) {
     saveApiKey(apiKeyInput.value.trim());
     apiKeyInput.value = "";
