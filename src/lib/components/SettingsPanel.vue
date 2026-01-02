@@ -1,74 +1,79 @@
 <template>
-  <section class="settings-section">
-    <div class="flair-toggle-container">
-      <label class="ai-flair-toggle" :class="{ active: aiMode }" @click="toggleAiMode">
-        <input
-          type="checkbox"
-          :checked="aiMode"
-          @change="toggleAiMode"
-          class="sr-only"
-        />
+  <aside class="settings-sidebar">
+    <!-- Mobile drawer toggle -->
+    <button class="drawer-toggle" @click="drawerOpen = !drawerOpen">
+      <span class="toggle-icon">⚙️</span>
+      <span class="toggle-text">SETTINGS</span>
+    </button>
 
-        <!-- Lumbergh photo background -->
-        <div class="flair-circle" :class="{ active: aiMode }">
-          <img
-            src="/lundberg.png"
-            alt="Bill Lumbergh"
-            class="lumbergh-photo"
+    <!-- Settings content -->
+    <div class="settings-content" :class="{ open: drawerOpen }">
+      <!-- Lundberg AI Toggle -->
+      <div class="control-section">
+        <label class="ai-toggle" :class="{ active: aiMode }" @click="toggleAiMode">
+          <input
+            type="checkbox"
+            :checked="aiMode"
+            @change="toggleAiMode"
+            class="sr-only"
           />
-        </div>
 
-        <!-- Center content -->
-        <div class="flair-content">
-          <div class="flair-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
-        </div>
-      </label>
+          <div class="toggle-circle" :class="{ active: aiMode }">
+            <img
+              src="/lundberg.png"
+              alt="Bill Lumbergh"
+              class="lumbergh-photo"
+            />
+          </div>
 
-      <div class="toggle-hint">
-        <span class="hint-text">Click to {{ aiMode ? 'disable' : 'enable' }} Lundberg-powered rewriting</span>
+          <div class="toggle-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
+        </label>
+
+        <p class="control-hint">
+          Lundberg AI {{ aiMode ? 'Enabled' : 'Disabled' }}
+        </p>
       </div>
-    </div>
 
-    <div class="settings-row">
-      <div class="sarcasm-toggle-container">
-        <label class="sarcasm-toggle">
+      <!-- Sarcasm Detection -->
+      <div class="control-section compact">
+        <label class="checkbox-control">
           <input
             type="checkbox"
             :checked="sarcasmMode"
             @change="toggleSarcasmMode"
           />
-          <span class="toggle-label">Enable sarcasm detection</span>
+          <span class="control-label">Sarcasm Detection</span>
         </label>
-        <p class="toggle-description">
-          Detect and rewrite sarcastic language patterns (dictionary mode only)
+        <p class="control-hint small">
+          Dictionary mode only
         </p>
       </div>
 
-      <details class="api-config">
-        <summary>
-          <span class="config-icon">⚙️</span>
-          API CONFIGURATION
-        </summary>
-        <div class="config-form">
-          <label class="form-field">
-            <span class="field-label">OPENAI API KEY</span>
+      <!-- API Configuration - only show if AI mode is on -->
+      <div v-if="aiMode" class="control-section compact">
+        <div class="api-config">
+          <label class="form-group">
+            <span class="form-label">OPENAI API KEY</span>
             <input
               type="password"
               v-model="apiKeyInput"
               placeholder="sk-..."
-              class="api-input"
+              class="form-input"
             />
           </label>
-          <button class="save-btn" @click="handleSaveKey">
-            {{ apiKey ? 'UPDATE KEY' : 'SAVE KEY' }}
+          <button class="save-button" @click="handleSaveKey">
+            {{ apiKey ? 'UPDATE' : 'SAVE' }}
           </button>
+          <p v-if="apiKey" class="save-status">
+            ✓ Key saved
+          </p>
         </div>
-        <p v-if="apiKey" class="key-status">
-          ✓ API key configured and stored locally
-        </p>
-      </details>
+      </div>
     </div>
-  </section>
+
+    <!-- Close overlay for mobile drawer -->
+    <div v-if="drawerOpen" class="drawer-overlay" @click="drawerOpen = false"></div>
+  </aside>
 </template>
 
 <script setup lang="ts">
@@ -82,6 +87,7 @@ import {
 } from "$lib/state";
 
 const apiKeyInput = ref("");
+const drawerOpen = ref(false);
 
 function toggleAiMode() {
   aiMode.value = !aiMode.value;
@@ -112,63 +118,71 @@ function handleSaveKey() {
   border: 0;
 }
 
-.settings-section {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin-bottom: 2rem;
+.settings-sidebar {
+  position: relative;
 }
 
-.flair-toggle-container {
+.drawer-toggle {
+  display: none;
+}
+
+.settings-content {
+  background: linear-gradient(145deg, #fff9e6 0%, #fff176 60%, #ffee58 100%);
+  border: 2px solid #d4a700;
+  padding: 1rem;
+  box-shadow: 
+    3px 4px 8px rgba(0,0,0,0.25),
+    -1px -1px 0 rgba(255,255,255,0.5) inset;
+  position: sticky;
+  transform: rotate(0.8deg);
+  top: 2rem;
+}
+
+.control-section {
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px dashed #d4a700;
+}
+
+.control-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.control-section.compact {
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Lundberg AI Toggle */
+.ai-toggle {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem 1rem;
-  margin-bottom: 2rem;
-  border-bottom: 3px double #4a4a4a;
-  background: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 100%);
-}
-
-.ai-flair-toggle {
-  position: relative;
-  width: 200px;
-  height: 200px;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: transform 0.3s ease;
   user-select: none;
-  margin-bottom: 40px;
 }
 
-.ai-flair-toggle:hover {
-  transform: scale(1.05) rotate(5deg);
-}
-
-.ai-flair-toggle.active:hover {
-  transform: scale(1.05) rotate(-5deg);
-}
-
-.flair-circle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+.toggle-circle {
+  position: relative;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: linear-gradient(135deg, #6a6a6a 0%, #4a4a4a 100%);
-  padding: 8px;
+  padding: 6px;
   box-shadow:
-    0 6px 20px rgba(0,0,0,0.4),
+    0 4px 12px rgba(0,0,0,0.4),
     inset 0 2px 4px rgba(255,255,255,0.2),
     inset 0 -2px 4px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
-  overflow: hidden;
 }
 
-.flair-circle.active {
+.toggle-circle.active {
   background: linear-gradient(135deg, #dc143c 0%, #b71c1c 100%);
   box-shadow:
-    0 8px 30px rgba(183,28,28,0.6),
+    0 6px 20px rgba(183,28,28,0.6),
     inset 0 2px 4px rgba(255,255,255,0.3),
     inset 0 -2px 4px rgba(0,0,0,0.4);
   animation: pulse-glow 2s infinite;
@@ -177,13 +191,13 @@ function handleSaveKey() {
 @keyframes pulse-glow {
   0%, 100% {
     box-shadow:
-      0 8px 30px rgba(183,28,28,0.6),
+      0 6px 20px rgba(183,28,28,0.6),
       inset 0 2px 4px rgba(255,255,255,0.3),
       inset 0 -2px 4px rgba(0,0,0,0.4);
   }
   50% {
     box-shadow:
-      0 12px 40px rgba(183,28,28,0.9),
+      0 8px 25px rgba(183,28,28,0.9),
       inset 0 2px 4px rgba(255,255,255,0.3),
       inset 0 -2px 4px rgba(0,0,0,0.4);
   }
@@ -194,179 +208,121 @@ function handleSaveKey() {
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  border: 4px solid #ffffff;
+  border: 3px solid #ffffff;
   box-shadow:
     inset 0 2px 6px rgba(0,0,0,0.2),
     0 2px 8px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
 }
 
-.flair-circle.active .lumbergh-photo {
+.toggle-circle.active .lumbergh-photo {
   border-color: #fff;
   filter: brightness(1.1);
 }
 
-
-
-.flair-content {
-  position: absolute;
-  bottom: -35px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.flair-status {
+.toggle-status {
   font-family: 'VT323', monospace;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   letter-spacing: 0.2em;
-  padding: 0.25rem 0.75rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 3px;
   transition: all 0.3s ease;
 }
 
-.ai-flair-toggle:not(.active) .flair-status {
+.ai-toggle:not(.active) .toggle-status {
   background: #5a5a5a;
   color: #a8a8a8;
   border: 2px solid #4a4a4a;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
-.ai-flair-toggle.active .flair-status {
+.ai-toggle.active .toggle-status {
   background: linear-gradient(145deg, #dc143c 0%, #b71c1c 100%);
   color: #fff;
   border: 2px solid #8b0000;
   box-shadow:
-    0 3px 8px rgba(183,28,28,0.5),
+    0 2px 6px rgba(183,28,28,0.5),
     inset 0 1px 0 rgba(255,255,255,0.3);
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.toggle-hint {
-  text-align: center;
-}
-
-.hint-text {
+.control-hint {
   font-family: 'Special Elite', monospace;
-  font-size: 0.85rem;
-  color: #6a6a6a;
+  font-size: 0.75rem;
+  color: #5d4037;
+  text-align: center;
+  margin: 0.5rem 0 0;
   font-style: italic;
 }
 
-.settings-row {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0 1.5rem 1rem;
+.control-hint.small {
+  font-size: 0.65rem;
+  margin: 0.25rem 0 0;
 }
 
-.sarcasm-toggle-container {
-  background: #faf8f3;
-  border: 1px solid #c9b896;
-  padding: 1rem;
-  min-width: 250px;
-}
-
-.sarcasm-toggle {
+/* Sarcasm Checkbox */
+.checkbox-control {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
   font-family: 'VT323', monospace;
-  font-size: 1rem;
-  color: #4a4a4a;
+  font-size: 0.9rem;
+  color: #5d4037;
 }
 
-.sarcasm-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+.checkbox-control input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
   cursor: pointer;
 }
 
-.toggle-label {
+.control-label {
   letter-spacing: 0.05em;
 }
 
-.toggle-description {
-  margin: 0.5rem 0 0;
-  font-family: 'VT323', monospace;
-  font-size: 0.75rem;
-  color: #6a6a6a;
-  font-style: italic;
-}
-
+/* API Configuration */
 .api-config {
-  background: #faf8f3;
+  background: rgba(255,255,255,0.3);
   border: 1px solid #c9b896;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem;
 }
 
-.api-config summary {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-family: 'VT323', monospace;
-  font-size: 0.85rem;
-  color: #4a4a4a;
-  cursor: pointer;
-  letter-spacing: 0.1em;
-}
-
-.api-config summary:hover {
-  color: #1a1a1a;
-}
-
-.config-icon {
-  font-size: 1rem;
-}
-
-.config-form {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.form-field {
+.form-group {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
-.field-label {
+.form-label {
   font-family: 'VT323', monospace;
-  font-size: 0.75rem;
-  color: #6a6a6a;
+  font-size: 0.7rem;
+  color: #5d4037;
   letter-spacing: 0.1em;
+  font-weight: bold;
 }
 
-.api-input {
-  padding: 0.5rem 0.75rem;
+.form-input {
+  padding: 0.5rem;
   font-family: 'VT323', monospace;
-  font-size: 1rem;
+  font-size: 0.9rem;
   background: #fefef9;
   border: 2px solid #a8a8a8;
-  width: 200px;
+  width: 100%;
 }
 
-.api-input:focus {
+.form-input:focus {
   outline: none;
   border-color: #b22222;
 }
 
-.save-btn {
-  padding: 0.5rem 1rem;
+.save-button {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
   font-family: 'VT323', monospace;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
   background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
   color: #e8e4d9;
@@ -378,45 +334,84 @@ function handleSaveKey() {
   top: 0;
 }
 
-.save-btn:hover {
+.save-button:hover {
   background: linear-gradient(180deg, #6a6a6a 0%, #5a5a5a 100%);
 }
 
-.save-btn:active {
+.save-button:active {
   top: 2px;
   box-shadow: 0 0 0 #2a2a2a;
 }
 
-.key-status {
-  margin: 0.75rem 0 0;
+.save-status {
+  margin: 0.5rem 0 0;
   font-family: 'VT323', monospace;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #2e7d32;
+  text-align: center;
 }
 
-@media (max-width: 600px) {
-  .ai-flair-toggle {
-    width: 160px;
-    height: 160px;
-    margin-bottom: 35px;
-  }
-
-  .flair-status {
-    font-size: 0.9rem;
-  }
-
-  .settings-row {
-    flex-direction: column;
-    padding: 0 1rem 1rem;
-  }
-
-  .config-form {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .api-input {
+/* Mobile Drawer */
+@media (max-width: 900px) {
+  .drawer-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     width: 100%;
+    padding: 0.75rem;
+    font-family: 'VT323', monospace;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
+    border: 2px solid #d4a700;
+    box-shadow: 0 3px 0 #b38600;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    top: 0;
+    margin-bottom: 1rem;
+    color: #5d4037;
+  }
+
+  .drawer-toggle:active {
+    top: 3px;
+    box-shadow: 0 0 0 #b38600;
+  }
+
+  .toggle-icon {
+    font-size: 1.2rem;
+  }
+
+  .settings-content {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 85vw;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    z-index: 1000;
+    overflow-y: auto;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.4);
+  }
+
+  .settings-content.open {
+    transform: translateX(0);
+  }
+
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 }
 </style>
