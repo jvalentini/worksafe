@@ -24,14 +24,21 @@ interface SpeechRecognitionAlternative {
   confidence: number;
 }
 
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+  message: string;
+}
+
 interface SpeechRecognition extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
   lang: string;
+  maxAlternatives: number;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
   onstart: (() => void) | null;
+  onnomatch: ((event: SpeechRecognitionEvent) => void) | null;
   start(): void;
   stop(): void;
   abort(): void;
@@ -71,6 +78,7 @@ export class SpeechHandler {
     this.recognition.continuous = true;
     this.recognition.interimResults = true;
     this.recognition.lang = "en-US";
+    this.recognition.maxAlternatives = 1;
 
     this.recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interimTranscript = "";
@@ -78,7 +86,7 @@ export class SpeechHandler {
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i];
-        if (!result) continue;
+        if (!result || result.length === 0) continue;
 
         const alternative = result[0];
         if (!alternative) continue;
@@ -102,7 +110,11 @@ export class SpeechHandler {
       }
     };
 
-    this.recognition.onerror = (event: { error: string }) => {
+    this.recognition.onnomatch = () => {
+      this.onStatus("Speech detected but not recognized. Try again.");
+    };
+
+    this.recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       const stopWithStatus = (status: string) => {
         this.pendingEndStatus = status;
         this.isListening = false;
@@ -111,7 +123,7 @@ export class SpeechHandler {
 
       if (event.error === "no-speech") {
         console.warn("Speech recognition error:", event.error);
-        this.onStatus("No speech detected. Try again.");
+        stopWithStatus("No speech detected. Click microphone to try again.");
         return;
       }
 
@@ -133,13 +145,51 @@ export class SpeechHandler {
         return;
       }
 
-      console.error("Speech recognition error:", event.error);
+      if (event.error === "aborted") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition was aborted.");
+        return;
+      }
+
+      if (event.error === "language-not-supported") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition language not supported.");
+        return;
+      }
+
+      if (event.error === "service-not-allowed") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition service not allowed.");
+        return;
+      }
+
+      if (event.error === "phrases-not-supported") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition phrases not supported.");
+        return;
+      }
+
+      if (event.error === "bad-grammar") {
+        console.warn("Speech recognition error:", event.error);
+        stopWithStatus("Speech recognition grammar error.");
+        return;
+      }
+
+      console.error("Speech recognition error:", event.error, event.message);
       stopWithStatus(`Error: ${event.error}`);
     };
 
     this.recognition.onend = () => {
       if (this.isListening) {
-        this.recognition?.start();
+        try {
+          this.recognition?.start();
+        } catch (error) {
+          console.error("Failed to restart speech recognition:", error);
+          this.isListening = false;
+          this.onStatus(
+            "Microphone connection lost. Click microphone to try again.",
+          );
+        }
         return;
       }
 
@@ -193,10 +243,34 @@ export class SpeechHandler {
     try {
       this.recognition.start();
     } catch (error) {
-      if ((error as Error).message?.includes("already started")) {
-        this.recognition.stop();
-        setTimeout(() => this.recognition?.start(), 100);
+      const errorMessage = (error as Error).message || "Unknown error";
+
+      if (errorMessage.includes("already started")) {
+        try {
+          this.recognition.stop();
+        } catch (stopError) {
+          console.error("Failed to stop speech recognition:", stopError);
+        }
+
+        setTimeout(() => {
+          try {
+            this.recognition?.start();
+          } catch (restartError) {
+            console.error(
+              "Failed to restart speech recognition:",
+              restartError,
+            );
+            this.isListening = false;
+            this.onStatus("Failed to start microphone. Please try again.");
+          }
+        }, 100);
+
+        return;
       }
+
+      console.error("Speech recognition start error:", error);
+      this.isListening = false;
+      this.onStatus(`Microphone error: ${errorMessage}`);
     }
   }
 
