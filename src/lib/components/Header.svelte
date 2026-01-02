@@ -1,6 +1,4 @@
 <script lang="ts">
-import { appState } from "$lib/state.svelte";
-
 const { children } = $props();
 </script>
 

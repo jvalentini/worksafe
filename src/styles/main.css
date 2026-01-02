@@ -172,6 +172,6 @@ body::before {
   }
 
   .no-print {
-    display: none !important;
+    display: none;
   }
 }

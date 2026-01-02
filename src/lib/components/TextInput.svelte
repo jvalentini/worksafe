@@ -1,14 +1,14 @@
 <script lang="ts">
 import { appState } from "$lib/state.svelte";
 
-function handleKeyDown(e: KeyboardEvent) {
+function _handleKeyDown(e: KeyboardEvent) {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     appState.processText(appState.textInput);
   }
 }
 
-async function handleTransform() {
+async function _handleTransform() {
   await appState.processText(appState.textInput);
 }
 </script>

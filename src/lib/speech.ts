@@ -172,7 +172,10 @@ export class SpeechHandler {
       await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch (error) {
       const err = error as Error;
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+      if (
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
+      ) {
         this.onStatus("Microphone access denied. Please allow access.");
         return;
       }

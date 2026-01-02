@@ -1,6 +1,4 @@
 <script lang="ts">
-import { appState } from "$lib/state.svelte";
-
 const { active = false, children, onclick } = $props();
 </script>
 

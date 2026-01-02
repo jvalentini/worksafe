@@ -2,20 +2,20 @@
 import { appState } from "$lib/state.svelte";
 
 let apiKeyInput = $state("");
-let showApiInput = $state(false);
+let _showApiInput = $state(false);
 
-function saveApiKey() {
+function _saveApiKey() {
   if (apiKeyInput.trim()) {
     appState.saveApiKey(apiKeyInput.trim());
-    showApiInput = false;
+    _showApiInput = false;
     apiKeyInput = "";
   }
 }
 
-function toggleAiMode() {
+function _toggleAiMode() {
   appState.aiMode = !appState.aiMode;
   if (appState.aiMode && !appState.apiKey) {
-    showApiInput = true;
+    _showApiInput = true;
   }
 }
 </script>

@@ -1,5 +1,5 @@
-import { type Detection, detectIssues } from "$lib/detector";
-import { formatAsEmail, getChangeSummary, transformText } from "$lib/replacer";
+import type { Detection } from "$lib/detector";
+import { formatAsEmail, transformText } from "$lib/replacer";
 import { checkSpeechSupport, SpeechHandler } from "$lib/speech";
 
 interface ChangeLog {
@@ -62,8 +62,10 @@ class AppState {
       await this.speechHandler.start();
       // Only set recording state if start was successful
       // The status callback will update voiceStatus with any errors
-      if (this.voiceStatus !== "Microphone access denied. Please allow access." &&
-          this.voiceStatus !== "No microphone found. Check your settings.") {
+      if (
+        this.voiceStatus !== "Microphone access denied. Please allow access." &&
+        this.voiceStatus !== "No microphone found. Check your settings."
+      ) {
         this.isRecording = true;
       }
     }
