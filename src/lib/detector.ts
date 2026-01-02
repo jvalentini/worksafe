@@ -9,10 +9,28 @@ import {
 } from "./dictionaries/aggressive";
 import { insultReplacements } from "./dictionaries/insults";
 import { passiveAggressivePhrases } from "./dictionaries/passive-aggressive";
+import {
+  persuasionApologyPhrases,
+  persuasionCommitmentPhrases,
+  persuasionFollowUpPhrases,
+  persuasionHedgingPhrases,
+  persuasionQualifierPhrases,
+  persuasionValidationPhrases,
+} from "./dictionaries/persuasion";
 import { profanityReplacements } from "./dictionaries/profanity";
 
 export interface Detection {
-  type: "profanity" | "insult" | "aggressive" | "passive-aggressive";
+  type:
+    | "profanity"
+    | "insult"
+    | "aggressive"
+    | "passive-aggressive"
+    | "persuasion-hedging"
+    | "persuasion-apologies"
+    | "persuasion-qualifiers"
+    | "persuasion-commitments"
+    | "persuasion-validation"
+    | "persuasion-followups";
   original: string;
   replacement: string;
   startIndex: number;
@@ -50,10 +68,32 @@ const allWordKeys = Object.keys(allWordReplacements).sort(
   (a, b) => b.length - a.length,
 );
 
-const allPhraseReplacements: PhraseReplacement[] = [
-  ...aggressivePhrases,
-  ...passiveAggressivePhrases,
+const phraseGroups: Array<{
+  type: Detection["type"];
+  phrases: PhraseReplacement[];
+}> = [
+  { type: "aggressive", phrases: aggressivePhrases },
+  { type: "passive-aggressive", phrases: passiveAggressivePhrases },
+  { type: "persuasion-hedging", phrases: persuasionHedgingPhrases },
+  { type: "persuasion-apologies", phrases: persuasionApologyPhrases },
+  { type: "persuasion-qualifiers", phrases: persuasionQualifierPhrases },
+  { type: "persuasion-commitments", phrases: persuasionCommitmentPhrases },
+  { type: "persuasion-validation", phrases: persuasionValidationPhrases },
+  { type: "persuasion-followups", phrases: persuasionFollowUpPhrases },
 ];
+
+const detectionTypePriority: Record<Detection["type"], number> = {
+  aggressive: 0,
+  "passive-aggressive": 1,
+  "persuasion-hedging": 2,
+  "persuasion-apologies": 3,
+  "persuasion-qualifiers": 4,
+  "persuasion-commitments": 5,
+  "persuasion-validation": 6,
+  "persuasion-followups": 7,
+  profanity: 8,
+  insult: 9,
+};
 
 export function detectIssues(text: string): Detection[] {
   const candidates: Detection[] = [];
@@ -86,30 +126,46 @@ export function detectIssues(text: string): Detection[] {
     position += word.length;
   }
 
-  for (const phrase of allPhraseReplacements) {
-    const regex = new RegExp(phrase.pattern.source, phrase.pattern.flags);
-    let match = regex.exec(text);
+  for (const group of phraseGroups) {
+    for (const phrase of group.phrases) {
+      const regex = new RegExp(phrase.pattern.source, phrase.pattern.flags);
+      let match = regex.exec(text);
 
-    while (match !== null) {
-      const type = aggressivePhrases.includes(phrase)
-        ? "aggressive"
-        : "passive-aggressive";
+      while (match !== null) {
+        addCandidate({
+          type: group.type,
+          original: match[0],
+          replacement: matchPhraseCase(
+            text,
+            match.index,
+            match[0],
+            phrase.replacement,
+          ),
+          startIndex: match.index,
+          endIndex: match.index + match[0].length,
+        });
 
-      addCandidate({
-        type,
-        original: match[0],
-        replacement: matchCase(match[0], phrase.replacement),
-        startIndex: match.index,
-        endIndex: match.index + match[0].length,
-      });
-
-      match = regex.exec(text);
+        match = regex.exec(text);
+      }
     }
   }
 
-  candidates.sort(
-    (a, b) => a.startIndex - b.startIndex || b.endIndex - a.endIndex,
-  );
+  candidates.sort((a, b) => {
+    const startDiff = a.startIndex - b.startIndex;
+    if (startDiff !== 0) return startDiff;
+
+    const endDiff = b.endIndex - a.endIndex;
+    if (endDiff !== 0) return endDiff;
+
+    const priorityDiff =
+      detectionTypePriority[a.type] - detectionTypePriority[b.type];
+    if (priorityDiff !== 0) return priorityDiff;
+
+    const typeDiff = a.type.localeCompare(b.type);
+    if (typeDiff !== 0) return typeDiff;
+
+    return a.replacement.localeCompare(b.replacement);
+  });
 
   const detections: Detection[] = [];
   for (const detection of candidates) {
@@ -288,6 +344,70 @@ function matchCase(original: string, replacement: string): string {
   }
 
   return replacement;
+}
+
+function matchPhraseCase(
+  text: string,
+  matchIndex: number,
+  original: string,
+  replacement: string,
+): string {
+  if (original === original.toUpperCase()) {
+    return replacement.toUpperCase();
+  }
+
+  if (isSentenceStart(text, matchIndex)) {
+    return capitalizeFirstLetter(replacement);
+  }
+
+  return replacement;
+}
+
+function isSentenceStart(text: string, matchIndex: number): boolean {
+  if (matchIndex <= 0) return true;
+
+  let index = matchIndex - 1;
+
+  while (index >= 0) {
+    const char = text[index];
+    if (char === undefined) break;
+    if (!isWhitespace(char)) break;
+    index--;
+  }
+
+  while (index >= 0) {
+    const char = text[index];
+    if (char === undefined) break;
+    if (!isLeadingDelimiter(char)) break;
+    index--;
+  }
+
+  if (index < 0) return true;
+
+  const boundary = text[index];
+  return (
+    boundary === "." ||
+    boundary === "!" ||
+    boundary === "?" ||
+    boundary === "\n" ||
+    boundary === "\r"
+  );
+}
+
+function isWhitespace(char: string): boolean {
+  return char === " " || char === "\t" || char === "\n" || char === "\r";
+}
+
+function isLeadingDelimiter(char: string): boolean {
+  return (
+    char === '"' || char === "'" || char === "(" || char === "[" || char === "{"
+  );
+}
+
+function capitalizeFirstLetter(value: string): string {
+  const firstChar = value.charAt(0);
+  if (!firstChar) return value;
+  return firstChar.toUpperCase() + value.slice(1);
 }
 
 export function hasProfanity(text: string): boolean {

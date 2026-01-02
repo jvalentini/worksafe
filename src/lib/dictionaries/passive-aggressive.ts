@@ -49,14 +49,6 @@ export const passiveAggressivePhrases: PhraseReplacement[] = [
     replacement: "checking in on",
   },
   {
-    pattern: /\bjust following up\b/gi,
-    replacement: "checking in",
-  },
-  {
-    pattern: /\bjust checking in\b/gi,
-    replacement: "following up",
-  },
-  {
     pattern: /\bfriendly reminder\b/gi,
     replacement: "reminder",
   },

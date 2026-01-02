@@ -52,6 +52,16 @@ describe("getChangeSummary", () => {
       "Transformed 1 aggressive phrase",
     );
   });
+
+  test("includes persuasion subcategory breakdown", () => {
+    const result = transformText(
+      "Just checking in. I think we should proceed.",
+    );
+
+    expect(getChangeSummary(result.changes)).toBe(
+      "Transformed persuasion (1 hedging, 1 follow-up)",
+    );
+  });
 });
 
 describe("integration: full text transformation", () => {
