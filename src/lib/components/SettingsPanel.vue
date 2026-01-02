@@ -1,26 +1,60 @@
 <template>
   <section class="settings-section">
-    <div class="settings-row">
-      <div class="mode-control">
-        <span class="control-label">PROCESSING MODE:</span>
-        <label class="toggle-switch">
-          <input 
-            type="checkbox" 
-            :checked="aiMode"
-            @change="toggleAiMode"
+    <div class="flair-toggle-container">
+      <label class="ai-flair-toggle" :class="{ active: aiMode }" @click="toggleAiMode">
+        <input 
+          type="checkbox" 
+          :checked="aiMode"
+          @change="toggleAiMode"
+          class="sr-only"
+        />
+        
+        <!-- Star burst background -->
+        <svg class="starburst" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="purpleGrad" cx="50%" cy="50%">
+              <stop offset="0%" :style="aiMode ? 'stop-color:#9c27b0;stop-opacity:1' : 'stop-color:#6a6a6a;stop-opacity:1'" />
+              <stop offset="100%" :style="aiMode ? 'stop-color:#6a1b9a;stop-opacity:1' : 'stop-color:#4a4a4a;stop-opacity:1'" />
+            </radialGradient>
+          </defs>
+          <g transform="translate(100, 100)">
+            <!-- 16-point starburst -->
+            <path v-for="i in 16" :key="i"
+              :d="`M 0 -70 L -8 -40 L 0 -85 L 8 -40 Z`"
+              :transform="`rotate(${i * 22.5})`"
+              fill="url(#purpleGrad)"
+              :opacity="aiMode ? 1 : 0.5"
+            />
+          </g>
+          <!-- Center circle -->
+          <circle cx="100" cy="100" r="60" 
+            :fill="aiMode ? '#8e24aa' : '#5a5a5a'"
+            stroke="#2a2a2a" 
+            stroke-width="3"
           />
-          <span class="toggle-track">
-            <span class="toggle-thumb"></span>
-          </span>
-          <span class="toggle-label">
-            {{ aiMode ? 'AI ENHANCED' : 'DICTIONARY ONLY' }}
-          </span>
-        </label>
-        <span class="mode-badge" :class="{ ai: aiMode }">
-          {{ aiMode ? '◉ ONLINE' : '○ LOCAL' }}
-        </span>
+          <circle cx="100" cy="100" r="60" 
+            fill="url(#purpleGrad)"
+            opacity="0.6"
+          />
+        </svg>
+        
+        <!-- Pin backing -->
+        <div class="pin-backing"></div>
+        
+        <!-- Center content -->
+        <div class="flair-content">
+          <div class="ai-icon">🤖</div>
+          <div class="flair-text">AI FLAIR</div>
+          <div class="flair-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
+        </div>
+      </label>
+      
+      <div class="toggle-hint">
+        <span class="hint-text">Click to {{ aiMode ? 'disable' : 'enable' }} AI-powered rewriting</span>
       </div>
+    </div>
 
+    <div class="settings-row">
       <details class="api-config">
         <summary>
           <span class="config-icon">⚙️</span>
@@ -67,95 +101,186 @@ function handleSaveKey() {
 </script>
 
 <style scoped>
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .settings-section {
-  background: #e8e4d9;
-  border: 2px solid #4a4a4a;
-  border-top: none;
-  padding: 1rem 1.5rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-top: 2rem;
+}
+
+.flair-toggle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 3px double #4a4a4a;
+  background: linear-gradient(180deg, rgba(0,0,0,0.02) 0%, transparent 100%);
+}
+
+.ai-flair-toggle {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  user-select: none;
+}
+
+.ai-flair-toggle:hover {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.ai-flair-toggle.active:hover {
+  transform: scale(1.05) rotate(-5deg);
+}
+
+.starburst {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  transition: all 0.3s ease;
+}
+
+.ai-flair-toggle.active .starburst {
+  filter: drop-shadow(0 6px 20px rgba(142,36,170,0.6));
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    filter: drop-shadow(0 6px 20px rgba(142,36,170,0.6));
+  }
+  50% { 
+    filter: drop-shadow(0 8px 30px rgba(142,36,170,0.9));
+  }
+}
+
+.pin-backing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 25px;
+  height: 40px;
+  background: linear-gradient(135deg, #c0c0c0 0%, #808080 50%, #606060 100%);
+  border-radius: 4px 4px 10px 10px;
+  box-shadow: 
+    inset 2px 2px 3px rgba(255,255,255,0.5),
+    inset -2px -2px 3px rgba(0,0,0,0.3),
+    0 6px 12px rgba(0,0,0,0.4);
+  z-index: 0;
+}
+
+.pin-backing::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 12px;
+  background: linear-gradient(180deg, #e0e0e0 0%, #909090 100%);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.8);
+}
+
+.flair-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ai-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.25rem;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+  transition: transform 0.3s ease;
+}
+
+.ai-flair-toggle.active .ai-icon {
+  transform: scale(1.1);
+  animation: bounce 0.6s ease;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: scale(1.1); }
+  50% { transform: scale(1.2); }
+}
+
+.flair-text {
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  color: white;
+  text-shadow: 
+    2px 2px 4px rgba(0,0,0,0.8),
+    0 0 10px rgba(255,255,255,0.5);
+  margin-bottom: 0.25rem;
+}
+
+.flair-status {
+  font-family: 'VT323', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.ai-flair-toggle:not(.active) .flair-status {
+  background: rgba(0,0,0,0.4);
+  color: #c0c0c0;
+}
+
+.ai-flair-toggle.active .flair-status {
+  background: rgba(255,255,255,0.3);
+  color: #fff;
+  box-shadow: 0 0 15px rgba(255,255,255,0.5);
+}
+
+.toggle-hint {
+  text-align: center;
+}
+
+.hint-text {
+  font-family: 'Special Elite', monospace;
+  font-size: 0.85rem;
+  color: #6a6a6a;
+  font-style: italic;
 }
 
 .settings-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-start;
   flex-wrap: wrap;
   gap: 1rem;
-}
-
-.mode-control {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.control-label {
-  font-family: 'VT323', monospace;
-  font-size: 0.9rem;
-  color: #4a4a4a;
-  letter-spacing: 0.1em;
-}
-
-.toggle-switch {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-}
-
-.toggle-switch input {
-  display: none;
-}
-
-.toggle-track {
-  width: 52px;
-  height: 26px;
-  background: #7a7a7a;
-  border-radius: 2px;
-  position: relative;
-  transition: background 0.2s;
-  border: 2px solid #4a4a4a;
-}
-
-.toggle-thumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  background: #c9b896;
-  transition: all 0.2s;
-}
-
-.toggle-switch input:checked + .toggle-track {
-  background: #2e7d32;
-}
-
-.toggle-switch input:checked + .toggle-track .toggle-thumb {
-  left: 28px;
-  background: #81c784;
-}
-
-.toggle-label {
-  font-family: 'VT323', monospace;
-  font-size: 0.85rem;
-  color: #4a4a4a;
-  min-width: 120px;
-}
-
-.mode-badge {
-  font-family: 'VT323', monospace;
-  font-size: 0.8rem;
-  padding: 0.25rem 0.75rem;
-  background: #e0e0e0;
-  color: #6a6a6a;
-  border: 1px solid #a8a8a8;
-}
-
-.mode-badge.ai {
-  background: #2e7d32;
-  color: #c8e6c9;
-  border-color: #1b5e20;
+  padding: 0 1.5rem 1rem;
 }
 
 .api-config {
@@ -250,8 +375,22 @@ function handleSaveKey() {
 }
 
 @media (max-width: 600px) {
+  .ai-flair-toggle {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .ai-icon {
+    font-size: 2rem;
+  }
+  
+  .flair-text {
+    font-size: 0.95rem;
+  }
+  
   .settings-row {
     flex-direction: column;
+    padding: 0 1rem 1rem;
   }
   
   .config-form {

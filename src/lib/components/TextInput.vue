@@ -58,9 +58,36 @@ function handleTransform() {
 
 <style scoped>
 .text-panel {
-  background: #f5f0e6;
-  border: 2px solid #4a4a4a;
+  background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
+  border: none;
   padding: 1.5rem;
+  position: relative;
+  box-shadow: 
+    3px 4px 8px rgba(0,0,0,0.25),
+    -1px -1px 0 rgba(255,255,255,0.5) inset;
+  transform: rotate(0.5deg);
+}
+
+.text-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.08);
+}
+
+.text-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 25px 25px;
+  border-color: transparent transparent rgba(0,0,0,0.15) transparent;
 }
 
 .panel-header {
@@ -69,15 +96,16 @@ function handleTransform() {
   gap: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px dashed #c9b896;
+  border-bottom: 2px dashed #d4a700;
 }
 
 .panel-id {
   font-family: 'VT323', monospace;
   font-size: 0.9rem;
-  background: #1a1a1a;
-  color: #00ff41;
+  background: #5d4037;
+  color: #fff740;
   padding: 0.25rem 0.5rem;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .panel-title {
@@ -85,7 +113,7 @@ function handleTransform() {
   font-size: 0.85rem;
   font-weight: bold;
   letter-spacing: 0.1em;
-  color: #4a4a4a;
+  color: #5d4037;
   flex: 1;
 }
 
@@ -93,9 +121,10 @@ function handleTransform() {
   font-family: 'VT323', monospace;
   font-size: 0.8rem;
   padding: 0.25rem 0.5rem;
-  background: #fce4ec;
+  background: rgba(252,228,236,0.8);
   color: #b71c1c;
   border: 1px solid #b71c1c;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
 .form-field {
@@ -107,7 +136,7 @@ function handleTransform() {
   font-family: 'Courier Prime', monospace;
   font-size: 0.75rem;
   font-weight: bold;
-  color: #4a4a4a;
+  color: #5d4037;
   margin-bottom: 0.5rem;
   letter-spacing: 0.05em;
 }
@@ -118,9 +147,9 @@ function handleTransform() {
   font-family: 'VT323', monospace;
   font-size: 1.15rem;
   line-height: 1.5;
-  background: #fefef9;
-  border: 2px solid #4a4a4a;
-  color: #1a1a1a;
+  background: rgba(255,255,255,0.4);
+  border: 2px solid #d4a700;
+  color: #5d4037;
   resize: vertical;
   min-height: 180px;
   box-shadow: 
@@ -137,7 +166,7 @@ function handleTransform() {
 }
 
 .vintage-textarea::placeholder {
-  color: #a8a8a8;
+  color: rgba(93,64,55,0.5);
   font-style: italic;
 }
 
@@ -148,7 +177,7 @@ function handleTransform() {
   margin-top: 0.5rem;
   font-family: 'Special Elite', monospace;
   font-size: 0.8rem;
-  color: #7a7a7a;
+  color: #5d4037;
   font-style: italic;
 }
 
@@ -224,18 +253,19 @@ function handleTransform() {
 .shortcut-badge {
   font-family: 'VT323', monospace;
   font-size: 0.85rem;
-  color: #7a7a7a;
+  color: #5d4037;
   display: flex;
   align-items: center;
   gap: 0.25rem;
 }
 
 .shortcut-badge kbd {
-  background: #e8e4d9;
-  border: 1px solid #a8a8a8;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid #d4a700;
   border-bottom-width: 2px;
   padding: 0.2rem 0.4rem;
   border-radius: 3px;
   font-family: inherit;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 </style>

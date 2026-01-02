@@ -108,9 +108,36 @@ async function copyText(text: string) {
 
 <style scoped>
 .output-section {
-  background: #f5f0e6;
-  border: 2px solid #4a4a4a;
+  background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
+  border: none;
   padding: 1.5rem;
+  position: relative;
+  box-shadow: 
+    3px 4px 8px rgba(0,0,0,0.25),
+    -1px -1px 0 rgba(255,255,255,0.5) inset;
+  transform: rotate(-0.5deg);
+}
+
+.output-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.08);
+}
+
+.output-section::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 25px 25px;
+  border-color: transparent transparent rgba(0,0,0,0.15) transparent;
 }
 
 .section-header {
@@ -119,16 +146,17 @@ async function copyText(text: string) {
   gap: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px dashed #c9b896;
+  border-bottom: 2px dashed #d4a700;
   flex-wrap: wrap;
 }
 
 .section-id {
   font-family: 'VT323', monospace;
   font-size: 0.9rem;
-  background: #1a1a1a;
-  color: #00ff41;
+  background: #5d4037;
+  color: #fff740;
   padding: 0.25rem 0.5rem;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .section-header h2 {
@@ -136,7 +164,7 @@ async function copyText(text: string) {
   font-size: 1rem;
   font-weight: bold;
   letter-spacing: 0.1em;
-  color: #4a4a4a;
+  color: #5d4037;
   margin: 0;
   flex: 1;
 }
@@ -172,12 +200,13 @@ async function copyText(text: string) {
   font-family: 'VT323', monospace;
   font-size: 1rem;
   letter-spacing: 0.1em;
-  background: #e8e4d9;
-  border: 2px solid #4a4a4a;
+  background: rgba(255,255,255,0.3);
+  border: 2px solid #d4a700;
   border-bottom: none;
-  color: #6a6a6a;
+  color: #5d4037;
   cursor: pointer;
   transition: all 0.15s;
+  box-shadow: 1px 0 3px rgba(0,0,0,0.1);
 }
 
 .tab-btn:first-child {
@@ -185,13 +214,13 @@ async function copyText(text: string) {
 }
 
 .tab-btn.active {
-  background: #fefef9;
-  color: #1a1a1a;
+  background: rgba(255,255,255,0.6);
+  color: #5d4037;
   font-weight: bold;
 }
 
 .tab-btn:hover:not(.active) {
-  background: #f0ece1;
+  background: rgba(255,255,255,0.4);
 }
 
 .output-document {
@@ -199,12 +228,12 @@ async function copyText(text: string) {
 }
 
 .document-paper {
-  background: #fefef9;
-  border: 2px solid #4a4a4a;
+  background: rgba(255,255,255,0.4);
+  border: 2px solid #d4a700;
   border-top: none;
   padding: 1.5rem;
   min-height: 150px;
-  box-shadow: inset 0 0 30px rgba(0,0,0,0.03);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
   position: relative;
 }
 
@@ -215,15 +244,15 @@ async function copyText(text: string) {
   left: 30px;
   bottom: 0;
   width: 1px;
-  background: #ffb6c1;
-  opacity: 0.5;
+  background: #d4a700;
+  opacity: 0.3;
 }
 
 .output-text {
   font-family: 'VT323', monospace;
   font-size: 1.15rem;
   line-height: 1.7;
-  color: #1a1a1a;
+  color: #5d4037;
   white-space: pre-wrap;
   word-break: break-word;
   padding-left: 20px;
@@ -243,7 +272,7 @@ async function copyText(text: string) {
   min-height: 100px;
   font-family: 'VT323', monospace;
   font-size: 1rem;
-  color: #a8a8a8;
+  color: rgba(93,64,55,0.5);
 }
 
 .placeholder-icon {
@@ -278,9 +307,10 @@ async function copyText(text: string) {
 }
 
 .changes-log {
-  background: #faf8f3;
-  border: 1px dashed #4a4a4a;
+  background: rgba(255,255,255,0.3);
+  border: 1px dashed #d4a700;
   padding: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .log-header {
@@ -289,13 +319,13 @@ async function copyText(text: string) {
   align-items: center;
   margin-bottom: 0.75rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #c9b896;
+  border-bottom: 1px solid #d4a700;
 }
 
 .log-title {
   font-family: 'VT323', monospace;
   font-size: 0.9rem;
-  color: #4a4a4a;
+  color: #5d4037;
   letter-spacing: 0.1em;
 }
 
@@ -303,8 +333,9 @@ async function copyText(text: string) {
   font-family: 'VT323', monospace;
   font-size: 0.85rem;
   color: #b71c1c;
-  background: #fce4ec;
+  background: rgba(252,228,236,0.8);
   padding: 0.2rem 0.5rem;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .changes-list {
@@ -345,12 +376,13 @@ async function copyText(text: string) {
   justify-content: center;
   gap: 0.75rem;
   padding: 1rem;
-  background: #e8f5e9;
+  background: rgba(232,245,233,0.7);
   border: 1px solid #81c784;
   font-family: 'VT323', monospace;
   font-size: 0.95rem;
   color: #2e7d32;
   letter-spacing: 0.1em;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .notice-icon {

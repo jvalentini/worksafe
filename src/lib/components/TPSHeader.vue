@@ -5,11 +5,33 @@
     <div class="header-content">
       <div class="logo-area">
         <div class="logo-badge">
-          <span class="stapler">📎</span>
+          <svg class="stapler-svg" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
+            <!-- Stapler body (top part) -->
+            <path d="M 10 15 L 70 15 L 70 25 L 10 25 Z" fill="#8b0000" stroke="#5a0000" stroke-width="1"/>
+            <path d="M 10 15 L 70 15 L 68 12 L 12 12 Z" fill="#b71c1c"/>
+            
+            <!-- Stapler base -->
+            <path d="M 5 25 L 75 25 L 75 35 L 5 35 Z" fill="#c62828" stroke="#5a0000" stroke-width="1"/>
+            <path d="M 5 25 L 75 25 L 73 22 L 7 22 Z" fill="#dc143c"/>
+            
+            <!-- Stapler bottom -->
+            <rect x="8" y="35" width="64" height="8" fill="#8b0000" stroke="#5a0000" stroke-width="1"/>
+            
+            <!-- Metal spring/hinge -->
+            <circle cx="15" cy="30" r="3" fill="#808080" stroke="#404040" stroke-width="0.5"/>
+            <circle cx="65" cy="30" r="3" fill="#808080" stroke="#404040" stroke-width="0.5"/>
+            
+            <!-- Stapler details/shadows -->
+            <rect x="20" y="17" width="40" height="2" fill="#5a0000" opacity="0.3"/>
+            <rect x="12" y="27" width="56" height="2" fill="#5a0000" opacity="0.3"/>
+            
+            <!-- Highlight -->
+            <rect x="15" y="16" width="45" height="3" fill="#ff6b6b" opacity="0.4"/>
+          </svg>
         </div>
         <div class="logo-text">
-          <h1>WORKSAFE<sup>™</sup></h1>
-          <div class="division">CORPORATE COMMUNICATIONS COMPLIANCE</div>
+          <h1>WORKSAFE<sup>®</sup></h1>
+          <div class="division">LANGUAGE COMPLIANCE SYSTEM</div>
         </div>
       </div>
 
@@ -38,15 +60,6 @@
       </div>
     </div>
 
-    <div class="flair-strip">
-      <FlairBadge emoji="☕" color="orange" title="I need my coffee" />
-      <FlairBadge emoji="📋" color="blue" title="TPS Reports" />
-      <FlairBadge emoji="🔴" color="red" title="Swingline Stapler" />
-      <FlairBadge emoji="💼" color="purple" title="Case of the Mondays" />
-      <FlairBadge emoji="🖨️" color="green" title="PC LOAD LETTER" />
-      <FlairBadge emoji="⭐" color="yellow" title="15 pieces of flair!" />
-    </div>
-
     <div class="lumbergh-quote">
       <span class="quote-icon">💬</span>
       <p>"Yeah, I'm going to need you to use professional language. That would be great."</p>
@@ -57,7 +70,6 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import FlairBadge from "./FlairBadge.vue";
 
 const currentDate = computed(() => {
   return new Date().toLocaleDateString("en-US", {
@@ -111,9 +123,9 @@ const reportNumber = computed(() => {
 }
 
 .logo-badge {
-  width: 60px;
-  height: 60px;
-  background: linear-gradient(135deg, #b22222 0%, #8b0000 100%);
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #e8e4d9 0%, #d4d0c5 100%);
   border: 3px solid #4a4a4a;
   display: flex;
   align-items: center;
@@ -121,36 +133,48 @@ const reportNumber = computed(() => {
   box-shadow: 
     3px 3px 0 rgba(0,0,0,0.2),
     inset 0 1px 0 rgba(255,255,255,0.3);
+  padding: 10px;
 }
 
-.stapler {
-  font-size: 1.75rem;
-  filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3));
+.stapler-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.4));
 }
 
 .logo-text h1 {
-  font-family: 'Courier Prime', 'Courier New', monospace;
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: 0.2em;
+  font-family: 'Arial Black', 'Arial', sans-serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
   color: #1a1a1a;
   margin: 0;
   line-height: 1;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+  text-transform: uppercase;
+  text-shadow: 
+    3px 3px 0 rgba(0,0,0,0.15),
+    1px 1px 0 rgba(255,255,255,0.5);
+  background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .logo-text h1 sup {
-  font-size: 0.4em;
+  font-size: 0.35em;
   vertical-align: super;
   color: #7a7a7a;
+  -webkit-text-fill-color: #7a7a7a;
 }
 
 .division {
-  font-family: 'VT323', monospace;
-  font-size: 0.9rem;
-  letter-spacing: 0.25em;
+  font-family: 'Arial', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
   color: #6a6a6a;
-  margin-top: 0.25rem;
+  margin-top: 0.35rem;
+  text-transform: uppercase;
 }
 
 .stamps-area {
@@ -225,15 +249,6 @@ const reportNumber = computed(() => {
   color: #1a1a1a;
 }
 
-.flair-strip {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 0.75rem 2rem;
-  background: linear-gradient(180deg, #d4d0c5 0%, #c9c5ba 100%);
-  border-bottom: 2px solid #a8a8a8;
-}
-
 .lumbergh-quote {
   display: flex;
   align-items: center;
@@ -276,10 +291,6 @@ const reportNumber = computed(() => {
 
   .memo-bar {
     justify-content: center;
-  }
-
-  .flair-strip {
-    flex-wrap: wrap;
   }
 }
 </style>

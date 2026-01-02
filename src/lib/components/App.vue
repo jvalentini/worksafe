@@ -3,6 +3,46 @@
     <TPSHeader />
 
     <main class="main-content">
+      <!-- Scattered Flair Pins -->
+      <div class="flair-pins-scattered">
+        <FlairBadge 
+          emoji="☕" 
+          color="orange" 
+          title="I need my coffee"
+          class="flair-scattered flair-1"
+        />
+        <FlairBadge 
+          emoji="📋" 
+          color="blue" 
+          title="TPS Reports"
+          class="flair-scattered flair-2"
+        />
+        <FlairBadge 
+          emoji="🔴" 
+          color="red" 
+          title="Swingline Stapler"
+          class="flair-scattered flair-3"
+        />
+        <FlairBadge 
+          emoji="💼" 
+          color="purple" 
+          title="Case of the Mondays"
+          class="flair-scattered flair-4"
+        />
+        <FlairBadge 
+          emoji="🖨️" 
+          color="green" 
+          title="PC LOAD LETTER"
+          class="flair-scattered flair-5"
+        />
+        <FlairBadge 
+          emoji="⭐" 
+          color="yellow" 
+          title="15 pieces of flair!"
+          class="flair-scattered flair-6"
+        />
+      </div>
+
       <div class="input-section">
         <PostItNote color="yellow" :rotate="-2">
           <strong>📝 INPUT</strong><br/>
@@ -65,6 +105,7 @@ import { onMounted } from "vue";
 import { initApp, inputMode } from "$lib/state";
 import TPSHeader from "./TPSHeader.vue";
 import PostItNote from "./PostItNote.vue";
+import FlairBadge from "./FlairBadge.vue";
 import VoiceInput from "./VoiceInput.vue";
 import TextInput from "./TextInput.vue";
 import SettingsPanel from "./SettingsPanel.vue";
@@ -94,6 +135,57 @@ onMounted(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 2rem 1.5rem;
+  position: relative;
+}
+
+.flair-pins-scattered {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.flair-scattered {
+  position: absolute;
+  pointer-events: auto;
+}
+
+/* Scattered positioning - mimicking random flair pin placement */
+.flair-1 {
+  top: 80px;
+  left: -80px;
+  transform: rotate(-15deg);
+}
+
+.flair-2 {
+  top: 280px;
+  right: -70px;
+  transform: rotate(22deg);
+}
+
+.flair-3 {
+  top: 180px;
+  left: -90px;
+  transform: rotate(8deg);
+}
+
+.flair-4 {
+  top: 520px;
+  right: -85px;
+  transform: rotate(-18deg);
+}
+
+.flair-5 {
+  top: 420px;
+  left: -75px;
+  transform: rotate(12deg);
+}
+
+.flair-6 {
+  top: 720px;
+  right: -80px;
+  transform: rotate(-25deg);
 }
 
 .input-section {
@@ -236,6 +328,11 @@ onMounted(() => {
   .footer-left,
   .footer-right {
     justify-content: center;
+  }
+
+  /* Hide flair pins on mobile to avoid overflow */
+  .flair-pins-scattered {
+    display: none;
   }
 }
 </style>

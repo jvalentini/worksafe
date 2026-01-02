@@ -45,7 +45,13 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import { toggleRecording as doToggleRecording, isRecording, inputMode, voiceStatus, liveTranscript } from "$lib/state";
+import {
+  toggleRecording as doToggleRecording,
+  isRecording,
+  inputMode,
+  voiceStatus,
+  liveTranscript,
+} from "$lib/state";
 
 const waveformCanvas = ref<HTMLCanvasElement | null>(null);
 let animationId: number | null = null;
@@ -127,9 +133,36 @@ onUnmounted(() => {
 
 <style scoped>
 .voice-panel {
-  background: #f5f0e6;
-  border: 2px solid #4a4a4a;
+  background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
+  border: none;
   padding: 1.5rem;
+  position: relative;
+  box-shadow: 
+    3px 4px 8px rgba(0,0,0,0.25),
+    -1px -1px 0 rgba(255,255,255,0.5) inset;
+  transform: rotate(-1deg);
+}
+
+.voice-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(0,0,0,0.08);
+}
+
+.voice-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 25px 25px;
+  border-color: transparent transparent rgba(0,0,0,0.15) transparent;
 }
 
 .panel-header {
@@ -138,15 +171,16 @@ onUnmounted(() => {
   gap: 1rem;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 2px dashed #c9b896;
+  border-bottom: 2px dashed #d4a700;
 }
 
 .panel-id {
   font-family: 'VT323', monospace;
   font-size: 0.9rem;
-  background: #1a1a1a;
-  color: #00ff41;
+  background: #5d4037;
+  color: #fff740;
   padding: 0.25rem 0.5rem;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.2);
 }
 
 .panel-title {
@@ -154,7 +188,7 @@ onUnmounted(() => {
   font-size: 0.85rem;
   font-weight: bold;
   letter-spacing: 0.1em;
-  color: #4a4a4a;
+  color: #5d4037;
   flex: 1;
 }
 
@@ -162,13 +196,14 @@ onUnmounted(() => {
   font-family: 'VT323', monospace;
   font-size: 0.85rem;
   padding: 0.25rem 0.75rem;
-  background: #e6f5e6;
+  background: rgba(255,255,255,0.5);
   color: #166534;
   border: 1px solid #166534;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
 }
 
 .panel-status.recording {
-  background: #fce4ec;
+  background: rgba(255,100,100,0.3);
   color: #b71c1c;
   border-color: #b71c1c;
   animation: blink 1s infinite;
@@ -227,52 +262,109 @@ onUnmounted(() => {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  max-width: 220px;
+  max-width: 240px;
   margin: 0 auto 1.5rem;
-  padding: 1.25rem;
-  background: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
-  border: 3px solid #5a5a5a;
+  padding: 1.5rem 1.25rem;
+  background: linear-gradient(180deg, #e0e0e0 0%, #b0b0b0 45%, #909090 55%, #707070 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 
+    0 8px 0 #4a4a4a,
+    0 10px 15px rgba(0,0,0,0.4),
+    inset 0 2px 0 rgba(255,255,255,0.7),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  position: relative;
+  top: 0;
 }
 
 .record-button:hover {
-  border-color: #c9b896;
-  background: linear-gradient(180deg, #4a4a4a 0%, #3d3d3d 100%);
+  background: linear-gradient(180deg, #f0f0f0 0%, #c0c0c0 45%, #a0a0a0 55%, #808080 100%);
+}
+
+.record-button:active {
+  top: 6px;
+  box-shadow: 
+    0 2px 0 #4a4a4a,
+    0 4px 8px rgba(0,0,0,0.3),
+    inset 0 2px 0 rgba(255,255,255,0.7),
+    inset 0 -2px 0 rgba(0,0,0,0.3);
 }
 
 .record-button.recording {
-  border-color: #b71c1c;
-  background: linear-gradient(180deg, #4a2a2a 0%, #3d1a1a 100%);
+  background: linear-gradient(180deg, #ff6b6b 0%, #e53935 45%, #c62828 55%, #b71c1c 100%);
+  box-shadow: 
+    0 8px 0 #5a0000,
+    0 10px 15px rgba(183,28,28,0.5),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.4);
+}
+
+.record-button.recording:active {
+  top: 6px;
+  box-shadow: 
+    0 2px 0 #5a0000,
+    0 4px 8px rgba(183,28,28,0.4),
+    inset 0 2px 0 rgba(255,255,255,0.4),
+    inset 0 -2px 0 rgba(0,0,0,0.4);
 }
 
 .record-light {
-  width: 28px;
-  height: 28px;
-  background: #8b0000;
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle at 30% 30%, #b71c1c 0%, #8b0000 100%);
   border-radius: 50%;
-  box-shadow: 0 0 0 3px #4a4a4a;
+  border: 4px solid #2a2a2a;
+  box-shadow: 
+    0 3px 6px rgba(0,0,0,0.4),
+    inset 0 2px 4px rgba(0,0,0,0.5),
+    inset 0 -1px 2px rgba(255,255,255,0.2);
   transition: all 0.2s;
 }
 
 .record-button.recording .record-light {
-  background: #ff4444;
+  background: radial-gradient(circle at 30% 30%, #ff6b6b 0%, #ff4444 100%);
+  border-color: #1a1a1a;
   box-shadow: 
-    0 0 0 3px #4a4a4a,
-    0 0 20px #ff4444;
+    0 3px 6px rgba(0,0,0,0.4),
+    inset 0 2px 4px rgba(0,0,0,0.3),
+    inset 0 -1px 2px rgba(255,255,255,0.4),
+    0 0 25px rgba(255,68,68,0.8);
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% { box-shadow: 0 0 0 3px #4a4a4a, 0 0 20px #ff4444; }
-  50% { box-shadow: 0 0 0 3px #4a4a4a, 0 0 40px #ff4444; }
+  0%, 100% { 
+    box-shadow: 
+      0 3px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.3),
+      inset 0 -1px 2px rgba(255,255,255,0.4),
+      0 0 25px rgba(255,68,68,0.8);
+  }
+  50% { 
+    box-shadow: 
+      0 3px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.3),
+      inset 0 -1px 2px rgba(255,255,255,0.4),
+      0 0 40px rgba(255,68,68,1);
+  }
 }
 
 .record-text {
   font-family: 'VT323', monospace;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
   letter-spacing: 0.15em;
-  color: #c9b896;
+  color: #2a2a2a;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+}
+
+.record-button.recording .record-text {
+  color: #ffffff;
+  text-shadow: 
+    0 1px 2px rgba(0,0,0,0.5),
+    0 0 10px rgba(255,255,255,0.5);
 }
 
 .status-display {
@@ -307,9 +399,10 @@ onUnmounted(() => {
 
 .transcript-box {
   margin-top: 1rem;
-  background: #faf8f3;
-  border: 1px dashed #4a4a4a;
+  background: rgba(255,255,255,0.3);
+  border: 1px dashed #d4a700;
   padding: 1rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .transcript-header {
@@ -318,7 +411,7 @@ onUnmounted(() => {
   margin-bottom: 0.5rem;
   font-family: 'VT323', monospace;
   font-size: 0.8rem;
-  color: #6a6a6a;
+  color: #5d4037;
   letter-spacing: 0.1em;
 }
 
@@ -329,7 +422,7 @@ onUnmounted(() => {
 .transcript-text {
   font-family: 'Special Elite', monospace;
   font-size: 1rem;
-  color: #1a1a1a;
+  color: #5d4037;
   font-style: italic;
   margin: 0;
   line-height: 1.6;
