@@ -59,13 +59,13 @@
 </template>
 
 <script setup lang="ts">
-import { processText, textInput } from "$lib/state";
+import { processText, textInput, isProcessing, inputMode } from "$lib/state";
 
-const _emit = defineEmits<{
+const emit = defineEmits<{
   "switch-mode": [mode: "voice" | "text"];
 }>();
 
-function _handleKeyDown(e: KeyboardEvent) {
+function handleKeyDown(e: KeyboardEvent) {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     handleTransform();

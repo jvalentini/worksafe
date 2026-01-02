@@ -59,7 +59,7 @@
       </button>
     </div>
 
-    <div v-if="changes.length > 0" class="changes-log">
+    <div v-if="changes && changes.length > 0" class="changes-log">
       <div class="log-header">
         <span class="log-title">📝 MODIFICATION LOG</span>
         <span class="log-count">{{ changes.length }} CHANGE(S)</span>
@@ -82,11 +82,12 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { transformedPlain, transformedEmail, changes } from "$lib/state";
 
 const outputMode = ref<"plain" | "email">("plain");
 const copied = ref(false);
 
-function _setMode(mode: "plain" | "email") {
+function setMode(mode: "plain" | "email") {
   outputMode.value = mode;
 }
 
@@ -94,7 +95,7 @@ function resetCopied() {
   copied.value = false;
 }
 
-async function _copyText(text: string) {
+async function copyText(text: string) {
   try {
     await navigator.clipboard.writeText(text);
     copied.value = true;
