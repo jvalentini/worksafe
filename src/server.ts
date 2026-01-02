@@ -3,6 +3,8 @@
  * In development mode, uses Bun's dev server with HMR.
  * In production mode, serves static files from dist/.
  */
+import indexHtml from "./index.html";
+
 export interface StartServerOptions {
   port?: number;
   log?: boolean;
@@ -23,9 +25,7 @@ export async function startServer(
 
   if (isDevelopment) {
     // Development mode: use Bun's dev server with HMR
-    // Import the HTML file directly so Bun can transform it with /_bun/asset/ paths
-    const indexHtml = await import("./index.html");
-
+    // Use the imported HTML bundle so Bun can transform it with /_bun/asset/ paths
     const server = Bun.serve({
       port,
       development: {
