@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "dev": "bun --hot src/server.ts",
-    "build": "bun build ./src/index.html --outdir dist --minify --target=browser --sourcemap",
+    "build": "bun build ./src/index.html --outdir dist --minify --target=browser --sourcemap && cp ./src/_redirects ./dist/_redirects",
     "preview": "NODE_ENV=production bun src/server.ts",
     "lint": "biome check src && oxlint src",
     "lint:fix": "biome check --write src",
@@ -25,6 +25,7 @@
   "dependencies": {
     "@types/node": "^25.0.3",
     "obscenity": "^0.4.5",
+    "svelte": "^5.46.1",
     "vite": "^7.3.0"
   }
 }
