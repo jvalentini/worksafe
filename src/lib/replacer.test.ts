@@ -2,6 +2,83 @@ import { describe, expect, test } from "bun:test";
 
 import { formatAsEmail, getChangeSummary, transformText } from "./replacer";
 
+interface TestCase {
+  name: string;
+  input: string;
+  expectedContains?: string[];
+  expectedNotContains?: string[];
+  expectedExact?: string;
+  expectedMinChangeCount?: number;
+}
+
+function runCase(tc: TestCase): void {
+  const result = transformText(tc.input);
+
+  if (tc.expectedExact !== undefined) {
+    expect(result.transformed).toBe(tc.expectedExact);
+  }
+
+  if (tc.expectedContains) {
+    for (const substr of tc.expectedContains) {
+      expect(result.transformed).toContain(substr);
+    }
+  }
+
+  if (tc.expectedNotContains) {
+    for (const substr of tc.expectedNotContains) {
+      expect(result.transformed).not.toContain(substr);
+    }
+  }
+
+  if (tc.expectedMinChangeCount !== undefined) {
+    expect(result.changeCount).toBeGreaterThanOrEqual(
+      tc.expectedMinChangeCount,
+    );
+  }
+}
+
+describe("table-driven baseline transformations", () => {
+  const baselineCases: TestCase[] = [
+    {
+      name: "single profanity replacement",
+      input: "This is shit work",
+      expectedContains: ["stuff"],
+      expectedNotContains: ["shit"],
+      expectedMinChangeCount: 1,
+    },
+    {
+      name: "multiple profanity replacements",
+      input: "fucking bullshit asshole",
+      expectedExact: "freaking nonsense jerk",
+    },
+    {
+      name: "insult word replacement",
+      input: "Those idiots are stupid",
+      expectedContains: ["people", "misguided"],
+      expectedNotContains: ["idiots", "stupid"],
+      expectedMinChangeCount: 2,
+    },
+    {
+      name: "passive-aggressive phrase replacement",
+      input: "Per my last email, just a friendly reminder",
+      expectedNotContains: ["Per my last email", "friendly reminder"],
+      expectedMinChangeCount: 2,
+    },
+    {
+      name: "aggressive phrase replacement",
+      input: "You always make mistakes. This is ridiculous.",
+      expectedNotContains: ["You always", "ridiculous"],
+      expectedMinChangeCount: 2,
+    },
+  ];
+
+  for (const tc of baselineCases) {
+    test(tc.name, () => {
+      runCase(tc);
+    });
+  }
+});
+
 describe("transformText", () => {
   test("returns original text when no changes needed", () => {
     const result = transformText("Hello team");
