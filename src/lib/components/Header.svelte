@@ -1,7 +1,3 @@
-<script lang="ts">
-const { children } = $props();
-</script>
-
 <header class="header">
 	<div class="header-content">
 		<div class="logo-row">

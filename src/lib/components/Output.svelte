@@ -1,8 +1,12 @@
 <script lang="ts">
-let _outputMode = $state<"plain" | "email">("plain");
+import { appState } from "$lib/state.svelte";
+import Tab from "./Tab.svelte";
+import CopyButton from "./CopyButton.svelte";
 
-function _setOutputMode(mode: "plain" | "email") {
-  _outputMode = mode;
+let outputMode = $state<"plain" | "email">("plain");
+
+function setOutputMode(mode: "plain" | "email") {
+  outputMode = mode;
 }
 </script>
 

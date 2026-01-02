@@ -1,13 +1,15 @@
 <script lang="ts">
-let _copied = $state(false);
+import { appState } from "$lib/state.svelte";
 
-async function _handleCopy(text: string, e: MouseEvent) {
+let copied = $state(false);
+
+async function handleCopy(text: string, e: MouseEvent) {
   const target = e.target as HTMLButtonElement;
   await navigator.clipboard.writeText(text);
-  _copied = true;
+  copied = true;
   target.textContent = "✓ COPIED TO CLIPBOARD";
   setTimeout(() => {
-    _copied = false;
+    copied = false;
     target.textContent = "📋 COPY TO CLIPBOARD";
   }, 2500);
 }
