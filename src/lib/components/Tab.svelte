@@ -1,5 +1,5 @@
 <script lang="ts">
-const { active = false, children, onclick } = $props();
+let { active = false, onclick, children } = $props();
 </script>
 
 <button class="tab" class:active {onclick}>

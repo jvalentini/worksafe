@@ -1,7 +1,13 @@
 <script lang="ts">
 import { appState } from "$lib/state.svelte";
+import Header from "./Header.svelte";
+import Tab from "./Tab.svelte";
+import VoiceInput from "./VoiceInput.svelte";
+import TextInput from "./TextInput.svelte";
+import Settings from "./Settings.svelte";
+import Output from "./Output.svelte";
 
-function _setInputMode(mode: "voice" | "text") {
+function setInputMode(mode: "voice" | "text") {
   appState.inputMode = mode;
 }
 </script>
