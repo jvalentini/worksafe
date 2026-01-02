@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
 import { formatAsEmail, getChangeSummary, transformText } from "./replacer";
+import {
+  tokenize,
+  computeAdjacencyScore,
+  type AdjacencyRule,
+} from "./detector";
 
 interface TestCase {
   name: string;
@@ -36,6 +41,258 @@ function runCase(tc: TestCase): void {
     );
   }
 }
+
+describe("M3: tokenization (pure function)", () => {
+  test("tokenizes simple text with positions", () => {
+    const text = "Hello world test";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    expect(tokens).toHaveLength(3);
+    expect(tokens[0]).toEqual({
+      raw: "Hello",
+      normalized: "hello",
+      startIndex: 0,
+      endIndex: 5,
+      isProtected: false,
+    });
+    expect(tokens[1]).toEqual({
+      raw: "world",
+      normalized: "world",
+      startIndex: 6,
+      endIndex: 11,
+      isProtected: false,
+    });
+  });
+
+  test("marks protected tokens: URLs", () => {
+    const text = "Check https://example.com for details";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    const httpsToken = tokens.find((t) => t.raw === "https");
+    const exampleToken = tokens.find((t) => t.raw === "example");
+
+    expect(httpsToken?.isProtected).toBe(true);
+    expect(exampleToken?.isProtected).toBe(true);
+  });
+
+  test("marks protected tokens: @handles", () => {
+    const text = "Ask @alice about this";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    const aliceToken = tokens.find((t) => t.raw === "alice");
+    expect(aliceToken?.isProtected).toBe(true);
+  });
+
+  test("marks protected tokens: #channels", () => {
+    const text = "Post in #general please";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    const generalToken = tokens.find((t) => t.raw === "general");
+    expect(generalToken?.isProtected).toBe(true);
+  });
+
+  test("excludes tokens in excluded zones (code blocks)", () => {
+    const text = "Normal text\n```\ncode here\n```\nMore text";
+    const masked = "Normal text\n   \n         \n   \nMore text";
+    const tokens = tokenize(text, masked);
+
+    const codeToken = tokens.find((t) => t.raw === "code");
+    const hereToken = tokens.find((t) => t.raw === "here");
+
+    expect(codeToken).toBeUndefined();
+    expect(hereToken).toBeUndefined();
+
+    const normalToken = tokens.find((t) => t.raw === "Normal");
+    const moreToken = tokens.find((t) => t.raw === "More");
+
+    expect(normalToken).toBeDefined();
+    expect(moreToken).toBeDefined();
+  });
+
+  test("handles contractions and hyphens", () => {
+    const text = "don't well-known";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    expect(tokens.some((t) => t.raw === "don't")).toBe(true);
+    expect(tokens.some((t) => t.raw === "well-known")).toBe(true);
+  });
+});
+
+describe("M3: adjacency scoring (pure function)", () => {
+  test("scores adjacent tokens (distance 0) as 1.0", () => {
+    const tokens = tokenize("you idiot", "you idiot");
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["idiot"],
+      maxDistance: 6,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).not.toBeNull();
+    expect(score?.score).toBe(1.0);
+    expect(score?.matchedTrigger).toBe("you");
+    expect(score?.matchedTarget).toBe("idiot");
+  });
+
+  test("scores 1 token apart (distance 1) as 0.5", () => {
+    const tokens = tokenize("you are idiot", "you are idiot");
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["idiot"],
+      maxDistance: 6,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).not.toBeNull();
+    expect(score?.score).toBe(0.5);
+  });
+
+  test("scores 2 tokens apart (distance 2) as ~0.33", () => {
+    const tokens = tokenize("you are an idiot", "you are an idiot");
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["idiot"],
+      maxDistance: 6,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).not.toBeNull();
+    expect(score?.score).toBeCloseTo(0.333, 2);
+  });
+
+  test("returns null when distance exceeds window", () => {
+    const tokens = tokenize(
+      "you are very very very very very stupid",
+      "you are very very very very very stupid",
+    );
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["stupid"],
+      maxDistance: 3,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).toBeNull();
+  });
+
+  test("protected tokens act as barriers", () => {
+    const text = "you https://example.com stupid";
+    const masked = text;
+    const tokens = tokenize(text, masked);
+
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["stupid"],
+      maxDistance: 6,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).toBeNull();
+  });
+
+  test("returns best score when multiple matches exist", () => {
+    const tokens = tokenize("you stupid idiot", "you stupid idiot");
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["stupid", "idiot"],
+      maxDistance: 6,
+    };
+
+    const score = computeAdjacencyScore(tokens, rule);
+
+    expect(score).not.toBeNull();
+    expect(score?.score).toBe(1.0);
+    expect(score?.matchedTarget).toBe("stupid");
+  });
+
+  test("deterministic scoring with same input", () => {
+    const tokens = tokenize("you are stupid", "you are stupid");
+    const rule: AdjacencyRule = {
+      triggerTokens: ["you"],
+      targetTokens: ["stupid"],
+      maxDistance: 6,
+    };
+
+    const score1 = computeAdjacencyScore(tokens, rule);
+    const score2 = computeAdjacencyScore(tokens, rule);
+
+    expect(score1).toEqual(score2);
+  });
+});
+
+describe("M3: adjacency-based clause rewrites (integration)", () => {
+  test("triggers attack rewrite via adjacency (no exact phrase match)", () => {
+    const result = transformText("You know what stupid");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+  });
+
+  test("triggers frustration rewrite via adjacency", () => {
+    const result = transformText("This seems ridiculous");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+  });
+
+  test("does not trigger when distance exceeds window", () => {
+    const result = transformText(
+      "Someone made a choice to implement various systems and your approach incorporates several elements finally resulting in something moronic",
+    );
+
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+    expect(result.transformed).toContain("poorly thought out");
+  });
+
+  test("adjacency blocked by protected token (@handle)", () => {
+    const result = transformText("You @alice stupid");
+
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("adjacency blocked by protected token (URL)", () => {
+    const result = transformText("This https://example.com ridiculous");
+
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-frustration"),
+    ).toBe(true);
+  });
+
+  test("adjacency works with 'your' trigger", () => {
+    const result = transformText("Your implementation idiotic");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+  });
+
+  test("adjacency works with 'that' and 'it' triggers", () => {
+    const result1 = transformText("That approach terrible");
+    expect(result1.changes[0]?.type).toBe("clause-rewrite-frustration");
+
+    const result2 = transformText("It seems awful");
+    expect(result2.changes[0]?.type).toBe("clause-rewrite-frustration");
+  });
+});
 
 describe("table-driven baseline transformations", () => {
   const baselineCases: TestCase[] = [
