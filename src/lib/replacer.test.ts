@@ -1206,3 +1206,96 @@ describe("M2: collapse consecutive negative sentences", () => {
     expect(result.transformed).toContain("Some normal text here.");
   });
 });
+
+describe("performance sanity checks", () => {
+  test("handles very long input without timing out (10K+ characters)", () => {
+    const profanityPhrase = "This is bullshit and fucking terrible. ";
+    const normalPhrase = "Some normal professional text here. ";
+    const mixedInput = (profanityPhrase + normalPhrase).repeat(200);
+
+    const startTime = performance.now();
+    const result = transformText(mixedInput);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    expect(duration).toBeLessThan(5000);
+    expect(result.transformed).not.toContain("bullshit");
+    expect(result.transformed).not.toContain("fucking");
+    expect(result.changeCount).toBeGreaterThan(0);
+    expect(result.transformed.length).toBeGreaterThan(0);
+  });
+
+  test("handles very long input with protected tokens", () => {
+    const phrase =
+      "Check https://example.com/test and message @alice in #general. This is shit. ";
+    const longInput = phrase.repeat(150);
+
+    const startTime = performance.now();
+    const result = transformText(longInput);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    expect(duration).toBeLessThan(5000);
+
+    const urlCount = (longInput.match(/https:\/\/example\.com\/test/g) || [])
+      .length;
+    const transformedUrlCount = (
+      result.transformed.match(/https:\/\/example\.com\/test/g) || []
+    ).length;
+    expect(transformedUrlCount).toBe(urlCount);
+    expect(result.transformed).not.toContain("shit");
+  });
+
+  test("handles very long input with excluded zones", () => {
+    const codeBlock = "```\nfucking code with shit\n```\n";
+    const quotedLine = "> This is bullshit quote\n";
+    const normalText = "Normal fucking text here. ";
+    const longInput = (codeBlock + quotedLine + normalText).repeat(100);
+
+    const startTime = performance.now();
+    const result = transformText(longInput);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    expect(duration).toBeLessThan(5000);
+    expect(result.transformed).toContain("fucking code with shit");
+    expect(result.transformed).toContain("> This is bullshit quote");
+    expect(result.transformed).toContain("freaking text here");
+    expect(result.changeCount).toBeGreaterThan(0);
+  });
+
+  test("handles very long input with adjacency rules", () => {
+    const adjacencyPhrase = "Just checking in on this. Per my last email. ";
+    const normalPhrase = "Some normal text here. ";
+    const longInput = (adjacencyPhrase + normalPhrase).repeat(150);
+
+    const startTime = performance.now();
+    const result = transformText(longInput);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    expect(duration).toBeLessThan(5000);
+    expect(result.changeCount).toBeGreaterThan(0);
+    expect(result.transformed).not.toContain("Just checking in");
+    expect(result.transformed).not.toContain("Per my last email");
+  });
+
+  test("handles pathological case: deeply nested alternating zones", () => {
+    let input = "";
+    for (let i = 0; i < 50; i++) {
+      input += "Normal fucking text. ";
+      input += "```\ncode with shit\n```\n";
+      input += "> quoted bullshit\n";
+      input += "More damn text. ";
+    }
+
+    const startTime = performance.now();
+    const result = transformText(input);
+    const endTime = performance.now();
+    const duration = endTime - startTime;
+
+    expect(duration).toBeLessThan(5000);
+    expect(result.transformed).toBeDefined();
+    expect(result.changeCount).toBeGreaterThan(0);
+  });
+});
