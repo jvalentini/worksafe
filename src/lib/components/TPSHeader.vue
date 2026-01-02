@@ -257,7 +257,7 @@ const reportNumber = computed(() => {
   padding: 1rem 2rem;
   background: linear-gradient(90deg, #fff59d 0%, #fff740 50%, #fff59d 100%);
   font-family: 'Special Elite', monospace;
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: #4e342e;
   border-top: 2px dashed #d4a700;
 }
@@ -266,6 +266,11 @@ const reportNumber = computed(() => {
   margin: 0;
   font-style: italic;
   text-align: center;
+  font-weight: bold;
+  text-shadow: 
+    1px 1px 0 rgba(255,255,255,0.6),
+    0 0 1px rgba(78,52,46,0.1);
+  letter-spacing: 0.02em;
 }
 
 .quote-icon {

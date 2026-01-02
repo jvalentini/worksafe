@@ -97,6 +97,9 @@
       </div>
       <div class="coffee-stain"></div>
     </footer>
+
+    <!-- AI Processing Indicator -->
+    <ProcessingBadge />
   </div>
 </template>
 
@@ -110,6 +113,7 @@ import VoiceInput from "./VoiceInput.vue";
 import TextInput from "./TextInput.vue";
 import SettingsPanel from "./SettingsPanel.vue";
 import OutputPanel from "./OutputPanel.vue";
+import ProcessingBadge from "./ProcessingBadge.vue";
 
 function setInputMode(mode: "voice" | "text") {
   inputMode.value = mode;

@@ -18,9 +18,9 @@
             </radialGradient>
           </defs>
           <g transform="translate(100, 100)">
-            <!-- 16-point starburst -->
+            <!-- 16-point starburst with fat rays and small points -->
             <path v-for="i in 16" :key="i"
-              :d="`M 0 -70 L -8 -40 L 0 -85 L 8 -40 Z`"
+              :d="`M 0 -50 L -12 -35 L 0 -58 L 12 -35 Z`"
               :transform="`rotate(${i * 22.5})`"
               fill="url(#purpleGrad)"
               :opacity="aiMode ? 1 : 0.5"

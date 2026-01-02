@@ -47,11 +47,6 @@ const gradientStyle = computed(() => {
   display: inline-block;
   cursor: default;
   user-select: none;
-  transition: transform 0.2s ease;
-}
-
-.flair-pin-container:hover {
-  transform: rotate(5deg) scale(1.05);
 }
 
 .flair-pin-backing {
