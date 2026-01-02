@@ -59,9 +59,13 @@ class AppState {
       this.voiceStatus = "Processing...";
       this.processText(this.liveTranscript);
     } else {
-      this.speechHandler.start();
-      this.isRecording = true;
-      this.voiceStatus = "Listening...";
+      await this.speechHandler.start();
+      // Only set recording state if start was successful
+      // The status callback will update voiceStatus with any errors
+      if (this.voiceStatus !== "Microphone access denied. Please allow access." &&
+          this.voiceStatus !== "No microphone found. Check your settings.") {
+        this.isRecording = true;
+      }
     }
   }
 
