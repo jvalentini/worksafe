@@ -38,12 +38,13 @@ describe("detectIssues", () => {
     expect(detectIssues("FUCK")[0]?.replacement).toBe("HECK");
   });
 
-  test("prefers phrase replacements over overlapping word replacements", () => {
+  test("prefers clause rewrites over phrase replacements", () => {
     expect(detectIssues("This is ridiculous")).toEqual([
       {
-        type: "aggressive",
+        type: "clause-rewrite-frustration",
         original: "This is ridiculous",
-        replacement: "This is unexpected",
+        replacement:
+          "This situation is concerning. I'd like to explore solutions to address it.",
         startIndex: 0,
         endIndex: 18,
       },
@@ -133,28 +134,25 @@ describe("excluded zone masking", () => {
     expect(detectIssues(input)).toEqual([]);
   });
 
-  test("detects profanity in comments inside fenced code blocks", () => {
+  test("does not detect profanity in comments inside fenced code blocks", () => {
     const input = "```\n// This is fucking stupid\n```";
     const detections = detectIssues(input);
 
-    expect(detections.length).toBeGreaterThan(0);
-    expect(detections.some((d) => d.original === "fucking")).toBe(true);
+    expect(detections.length).toBe(0);
   });
 
-  test("detects profanity in hash comments inside fenced code", () => {
+  test("does not detect profanity in hash comments inside fenced code", () => {
     const input = "```python\n# This shit is broken\n```";
     const detections = detectIssues(input);
 
-    expect(detections.length).toBeGreaterThan(0);
-    expect(detections.some((d) => d.original === "shit")).toBe(true);
+    expect(detections.length).toBe(0);
   });
 
-  test("detects profanity in block comments inside fenced code", () => {
+  test("does not detect profanity in block comments inside fenced code", () => {
     const input = "```javascript\n/* This is fucking ridiculous */\n```";
     const detections = detectIssues(input);
 
-    expect(detections.length).toBeGreaterThan(0);
-    expect(detections.some((d) => d.original === "fucking")).toBe(true);
+    expect(detections.length).toBe(0);
   });
 
   test("handles mixed content with quotes, code, and normal text", () => {

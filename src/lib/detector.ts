@@ -30,7 +30,9 @@ export interface Detection {
     | "persuasion-qualifiers"
     | "persuasion-commitments"
     | "persuasion-validation"
-    | "persuasion-followups";
+    | "persuasion-followups"
+    | "clause-rewrite-attack"
+    | "clause-rewrite-frustration";
   original: string;
   replacement: string;
   startIndex: number;
@@ -83,16 +85,18 @@ const phraseGroups: Array<{
 ];
 
 const detectionTypePriority: Record<Detection["type"], number> = {
-  aggressive: 0,
-  "passive-aggressive": 1,
-  "persuasion-hedging": 2,
-  "persuasion-apologies": 3,
-  "persuasion-qualifiers": 4,
-  "persuasion-commitments": 5,
-  "persuasion-validation": 6,
-  "persuasion-followups": 7,
-  profanity: 8,
-  insult: 9,
+  "clause-rewrite-attack": 0,
+  "clause-rewrite-frustration": 1,
+  aggressive: 2,
+  "passive-aggressive": 3,
+  "persuasion-hedging": 4,
+  "persuasion-apologies": 5,
+  "persuasion-qualifiers": 6,
+  "persuasion-commitments": 7,
+  "persuasion-validation": 8,
+  "persuasion-followups": 9,
+  profanity: 10,
+  insult: 11,
 };
 
 function createMaskedText(text: string): string {
@@ -119,16 +123,8 @@ function createMaskedText(text: string): string {
         eligible[i] = false;
       }
     } else if (inFencedBlock) {
-      const trimmed = line.trimStart();
-      const isComment =
-        trimmed.startsWith("#") ||
-        trimmed.startsWith("//") ||
-        trimmed.startsWith("/*");
-
-      if (!isComment) {
-        for (let i = lineStart; i <= lineEnd; i++) {
-          eligible[i] = false;
-        }
+      for (let i = lineStart; i <= lineEnd; i++) {
+        eligible[i] = false;
       }
     }
 
@@ -166,8 +162,15 @@ export function detectIssues(text: string): Detection[] {
   const candidates: Detection[] = [];
   const seen = new Set<string>();
 
-  // Create masked text where ineligible zones are replaced with spaces
   const maskedText = createMaskedText(text);
+
+  const { rewrites: clauseRewrites, skippedRanges } = detectClauseRewrites(
+    text,
+    maskedText,
+  );
+  for (const rewrite of clauseRewrites) {
+    addCandidate(rewrite);
+  }
 
   const obscenityMatches = obscenityMatcher.getAllMatches(maskedText, true);
   for (const match of obscenityMatches) {
@@ -257,6 +260,19 @@ export function detectIssues(text: string): Detection[] {
         detection.endIndex,
       )
     ) {
+      continue;
+    }
+
+    const isInSkippedRange = skippedRanges.some((range) =>
+      rangesOverlap(
+        range.startIndex,
+        range.endIndex,
+        detection.startIndex,
+        detection.endIndex,
+      ),
+    );
+
+    if (isInSkippedRange) {
       continue;
     }
 
@@ -553,4 +569,179 @@ export function segmentSentences(text: string): SentenceSpan[] {
   }
 
   return spans;
+}
+
+interface SentenceCandidate {
+  sentence: SentenceSpan;
+  type: "clause-rewrite-attack" | "clause-rewrite-frustration";
+  sentenceText: string;
+  hasProtectedTokens: boolean;
+  isInExcludedZone: boolean;
+}
+
+interface ClauseRewriteResult {
+  rewrites: Detection[];
+  skippedRanges: Array<{ startIndex: number; endIndex: number }>;
+}
+
+function detectClauseRewrites(
+  text: string,
+  maskedText: string,
+): ClauseRewriteResult {
+  const sentences = segmentSentences(text);
+
+  const insultTerms = Object.keys(insultReplacements);
+  const negativeTerms = [
+    "ridiculous",
+    "absurd",
+    "unacceptable",
+    "terrible",
+    "awful",
+    "horrible",
+    "garbage",
+    "trash",
+    "useless",
+    "worthless",
+    "pathetic",
+  ];
+
+  const candidates: SentenceCandidate[] = [];
+  const skippedRanges: Array<{ startIndex: number; endIndex: number }> = [];
+
+  for (const sentence of sentences) {
+    const sentenceText = text.slice(sentence.startIndex, sentence.endIndex);
+    const maskedSentenceText = maskedText.slice(
+      sentence.startIndex,
+      sentence.endIndex,
+    );
+    const lowerSentence = maskedSentenceText.toLowerCase();
+
+    const isInExcludedZone = sentenceText !== maskedSentenceText;
+    const hasProtectedTokens =
+      /https?:\/\/|@[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+/.test(sentenceText);
+
+    const hasYouYour = /\b(you|your)\b/.test(lowerSentence);
+    const hasInsult = insultTerms.some((term) =>
+      new RegExp(`\\b${term}\\b`).test(lowerSentence),
+    );
+
+    const isAttackPattern = hasYouYour && hasInsult;
+
+    const hasThisThatIt = /\b(this|that|it)\b/.test(lowerSentence);
+    const hasCopula = /\b(is|was|are|were)\b/.test(lowerSentence);
+    const hasNegative = negativeTerms.some((term) =>
+      new RegExp(`\\b${term}\\b`).test(lowerSentence),
+    );
+
+    const isFrustrationPattern = hasThisThatIt && hasCopula && hasNegative;
+
+    if ((isAttackPattern || isFrustrationPattern) && hasProtectedTokens) {
+      skippedRanges.push({
+        startIndex: sentence.startIndex,
+        endIndex: sentence.endIndex,
+      });
+      continue;
+    }
+
+    if (isInExcludedZone) {
+      continue;
+    }
+
+    if (isAttackPattern) {
+      candidates.push({
+        sentence,
+        type: "clause-rewrite-attack",
+        sentenceText,
+        hasProtectedTokens,
+        isInExcludedZone,
+      });
+      continue;
+    }
+
+    if (isFrustrationPattern) {
+      candidates.push({
+        sentence,
+        type: "clause-rewrite-frustration",
+        sentenceText,
+        hasProtectedTokens,
+        isInExcludedZone,
+      });
+    }
+  }
+
+  if (candidates.length === 0) {
+    return { rewrites: [], skippedRanges };
+  }
+
+  const groups: SentenceCandidate[][] = [];
+  const firstCandidate = candidates[0];
+  if (!firstCandidate) {
+    return { rewrites: [], skippedRanges };
+  }
+
+  let currentGroup: SentenceCandidate[] = [firstCandidate];
+
+  for (let i = 1; i < candidates.length; i++) {
+    const prev = candidates[i - 1];
+    const curr = candidates[i];
+
+    if (!prev || !curr) continue;
+
+    // Check if they are consecutive (only whitespace between them)
+    const gapText = text.slice(
+      prev.sentence.endIndex,
+      curr.sentence.startIndex,
+    );
+    const gapMasked = maskedText.slice(
+      prev.sentence.endIndex,
+      curr.sentence.startIndex,
+    );
+
+    // Sentences are consecutive if the gap contains only whitespace AND
+    // the gap is identical in both original and masked text (no excluded zones/protected tokens)
+    const isConsecutive = gapText.trim() === "" && gapText === gapMasked;
+
+    if (isConsecutive) {
+      currentGroup.push(curr);
+    } else {
+      groups.push(currentGroup);
+      currentGroup = [curr];
+    }
+  }
+  groups.push(currentGroup);
+
+  const rewrites: Detection[] = [];
+  for (const group of groups) {
+    const firstInGroup = group[0];
+    const lastInGroup = group[group.length - 1];
+    if (!firstInGroup || !lastInGroup) continue;
+
+    const startIndex = firstInGroup.sentence.startIndex;
+    const endIndex = lastInGroup.sentence.endIndex;
+    const original = text.slice(startIndex, endIndex);
+
+    const hasAttack = group.some((c) => c.type === "clause-rewrite-attack");
+    const type = hasAttack
+      ? "clause-rewrite-attack"
+      : "clause-rewrite-frustration";
+
+    let replacement: string;
+    if (type === "clause-rewrite-attack") {
+      replacement =
+        "I'm concerned about this situation and would like to work through it together.";
+    } else {
+      replacement =
+        "This situation is concerning. I'd like to explore solutions to address it.";
+    }
+
+    rewrites.push({
+      type,
+      original,
+      replacement,
+      startIndex,
+      endIndex,
+    });
+  }
+
+  return { rewrites, skippedRanges };
 }
