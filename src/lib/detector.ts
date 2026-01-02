@@ -109,6 +109,10 @@ const SAFE_WORDS_BLACKLIST = new Set([
   "grass",
   "funk",
   "funky",
+  "hello",
+  "sure",
+  "yeah",
+  "help",
 ]);
 
 const obscenityMatcher = new RegExpMatcher({
@@ -575,9 +579,15 @@ function findClosestReplacement(word: string): string | null {
     return null;
   }
 
+  const isSufficientLengthForSubstringMatch =
+    cleaned.length >= MIN_FUZZY_MATCH_LENGTH;
+
   for (const [key, value] of Object.entries(allWordReplacements)) {
-    if (cleaned.includes(key) || key.includes(cleaned)) {
-      return value;
+    const keyIsLongEnough = key.length >= MIN_FUZZY_MATCH_LENGTH;
+    if (isSufficientLengthForSubstringMatch && keyIsLongEnough) {
+      if (cleaned.includes(key) || key.includes(cleaned)) {
+        return value;
+      }
     }
   }
 
