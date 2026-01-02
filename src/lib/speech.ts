@@ -211,10 +211,30 @@ export class SpeechHandler {
     return this.recognition !== null;
   }
 
-  start(): void {
+  async start(): Promise<void> {
     if (!this.recognition) {
       this.onStatus("Speech recognition not available");
       return;
+    }
+
+    // Request microphone permission explicitly (required for Brave browser)
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (error) {
+      const err = error as Error;
+      if (
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
+      ) {
+        this.onStatus("Microphone access denied. Please allow access.");
+        return;
+      }
+      if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
+        this.onStatus("No microphone found. Check your settings.");
+        return;
+      }
+      // For other errors, log but continue - some browsers may still allow speech recognition
+      console.warn("Microphone permission request failed:", err);
     }
 
     this.fullTranscript = "";
@@ -260,11 +280,11 @@ export class SpeechHandler {
     this.onStatus("Ready");
   }
 
-  toggle(): boolean {
+  async toggle(): Promise<boolean> {
     if (this.isListening) {
       this.stop();
     } else {
-      this.start();
+      await this.start();
     }
     return this.isListening;
   }

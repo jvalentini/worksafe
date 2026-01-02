@@ -28,7 +28,7 @@ async function openWebSocket(url: string, timeoutMs = 2000): Promise<void> {
 
 describe("e2e dev server", () => {
   test("serves app HTML, assets, and HMR websocket", async () => {
-    const server = await startServer({ mode: "dev", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
@@ -37,8 +37,8 @@ describe("e2e dev server", () => {
       expect(indexResponse.ok).toBe(true);
 
       const html = await indexResponse.text();
-      expect(html).toContain('id="text-input"');
-      expect(html).toContain('id="transform-btn"');
+      expect(html).toContain('id="app"');
+      expect(html).toContain("WorkSafe");
 
       const assetPaths = new Set<string>();
       for (const match of html.matchAll(
@@ -69,7 +69,6 @@ describe("e2e prod server", () => {
   const distDir = join(import.meta.dirname, "../../dist");
 
   beforeAll(async () => {
-    // Build the project before running prod tests
     const result = Bun.spawnSync(["bun", "run", "build"], {
       cwd: join(import.meta.dirname, "../.."),
       stdout: "pipe",
@@ -82,14 +81,13 @@ describe("e2e prod server", () => {
   });
 
   afterAll(() => {
-    // Clean up dist directory after tests
     if (existsSync(distDir)) {
       rmSync(distDir, { recursive: true });
     }
   });
 
   test("serves static HTML and assets from dist/", async () => {
-    const server = await startServer({ mode: "prod", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
@@ -98,8 +96,8 @@ describe("e2e prod server", () => {
       expect(indexResponse.ok).toBe(true);
 
       const html = await indexResponse.text();
-      expect(html).toContain('id="text-input"');
-      expect(html).toContain('id="transform-btn"');
+      expect(html).toContain('id="app"');
+      expect(html).toContain("WorkSafe");
 
       const assetPaths = new Set<string>();
       for (const match of html.matchAll(
@@ -121,7 +119,7 @@ describe("e2e prod server", () => {
   });
 
   test("returns 404 for /_bun/* paths", async () => {
-    const server = await startServer({ mode: "prod", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
@@ -135,7 +133,7 @@ describe("e2e prod server", () => {
   });
 
   test("returns 404 for missing assets", async () => {
-    const server = await startServer({ mode: "prod", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
@@ -149,7 +147,7 @@ describe("e2e prod server", () => {
   });
 
   test("serves index.html for SPA routes", async () => {
-    const server = await startServer({ mode: "prod", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
@@ -159,14 +157,14 @@ describe("e2e prod server", () => {
       expect(response.ok).toBe(true);
 
       const html = await response.text();
-      expect(html).toContain('id="text-input"');
+      expect(html).toContain('id="app"');
     } finally {
       server.stop(true);
     }
   });
 
   test("rejects null byte injection attempts", async () => {
-    const server = await startServer({ mode: "prod", port: 0, log: false });
+    const server = await startServer({ port: 0, log: false });
 
     try {
       const baseUrl = new URL(String(server.url));
