@@ -95,29 +95,102 @@ const detectionTypePriority: Record<Detection["type"], number> = {
   insult: 9,
 };
 
+function createMaskedText(text: string): string {
+  const eligible = new Array(text.length).fill(true);
+
+  let pos = 0;
+  let inFencedBlock = false;
+
+  while (pos < text.length) {
+    const lineStart = pos;
+
+    let lineEnd = text.indexOf("\n", pos);
+    if (lineEnd === -1) lineEnd = text.length;
+
+    const line = text.slice(lineStart, lineEnd);
+
+    if (line.trimStart().startsWith("```")) {
+      inFencedBlock = !inFencedBlock;
+      for (let i = lineStart; i <= lineEnd; i++) {
+        eligible[i] = false;
+      }
+    } else if (line.startsWith(">")) {
+      for (let i = lineStart; i <= lineEnd; i++) {
+        eligible[i] = false;
+      }
+    } else if (inFencedBlock) {
+      const trimmed = line.trimStart();
+      const isComment =
+        trimmed.startsWith("#") ||
+        trimmed.startsWith("//") ||
+        trimmed.startsWith("/*");
+
+      if (!isComment) {
+        for (let i = lineStart; i <= lineEnd; i++) {
+          eligible[i] = false;
+        }
+      }
+    }
+
+    pos = lineEnd + 1;
+  }
+
+  const protectedPatterns = [
+    /https?:\/\/[^\s]+/g,
+    /@[a-zA-Z0-9_-]+/g,
+    /#[a-zA-Z0-9_-]+/g,
+  ];
+
+  for (const pattern of protectedPatterns) {
+    const matches = text.matchAll(pattern);
+    for (const match of matches) {
+      const start = match.index;
+      if (start !== undefined) {
+        const end = start + match[0].length;
+        for (let i = start; i < end; i++) {
+          eligible[i] = false;
+        }
+      }
+    }
+  }
+
+  let masked = "";
+  for (let i = 0; i < text.length; i++) {
+    masked += eligible[i] ? text[i] : " ";
+  }
+
+  return masked;
+}
+
 export function detectIssues(text: string): Detection[] {
   const candidates: Detection[] = [];
   const seen = new Set<string>();
 
-  const obscenityMatches = obscenityMatcher.getAllMatches(text, true);
+  // Create masked text where ineligible zones are replaced with spaces
+  const maskedText = createMaskedText(text);
+
+  const obscenityMatches = obscenityMatcher.getAllMatches(maskedText, true);
   for (const match of obscenityMatches) {
     addCandidate(
       createObscenityDetection(text, match.startIndex, match.endIndex + 1),
     );
   }
 
-  const words = text.split(/\b/);
+  const words = maskedText.split(/\b/);
   let position = 0;
 
   for (const word of words) {
     const lowerWord = word.toLowerCase();
-    const replacement = insultReplacements[lowerWord];
+    const replacement = allWordReplacements[lowerWord];
 
     if (replacement) {
+      // Extract original word from original text using indices
+      const originalWord = text.slice(position, position + word.length);
+      const wordType = getWordType(lowerWord);
       addCandidate({
-        type: "insult",
-        original: word,
-        replacement: matchCase(word, replacement),
+        type: wordType,
+        original: originalWord,
+        replacement: matchCase(originalWord, replacement),
         startIndex: position,
         endIndex: position + word.length,
       });
@@ -129,23 +202,28 @@ export function detectIssues(text: string): Detection[] {
   for (const group of phraseGroups) {
     for (const phrase of group.phrases) {
       const regex = new RegExp(phrase.pattern.source, phrase.pattern.flags);
-      let match = regex.exec(text);
+      let match = regex.exec(maskedText);
 
       while (match !== null) {
+        // Extract original phrase from original text using indices
+        const originalPhrase = text.slice(
+          match.index,
+          match.index + match[0].length,
+        );
         addCandidate({
           type: group.type,
-          original: match[0],
+          original: originalPhrase,
           replacement: matchPhraseCase(
             text,
             match.index,
-            match[0],
+            originalPhrase,
             phrase.replacement,
           ),
           startIndex: match.index,
           endIndex: match.index + match[0].length,
         });
 
-        match = regex.exec(text);
+        match = regex.exec(maskedText);
       }
     }
   }

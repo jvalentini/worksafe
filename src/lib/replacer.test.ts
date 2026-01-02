@@ -141,6 +141,84 @@ describe("getChangeSummary", () => {
   });
 });
 
+describe("protected tokens: URLs, @handles, #channels", () => {
+  test("preserves URLs with profanity adjacent", () => {
+    const result = transformText(
+      "Check this shit out: https://example.com/path",
+    );
+
+    expect(result.transformed).toContain("https://example.com/path");
+    expect(result.transformed).not.toContain("shit");
+  });
+
+  test("preserves profanity inside URL path", () => {
+    const result = transformText(
+      "Visit https://example.com/damn/bullshit for details",
+    );
+
+    expect(result.transformed).toBe(
+      "Visit https://example.com/damn/bullshit for details",
+    );
+    expect(result.changeCount).toBe(0);
+  });
+
+  test("preserves @handles with profanity adjacent", () => {
+    const result = transformText("That fucking @username is awesome");
+
+    expect(result.transformed).toContain("@username");
+    expect(result.transformed).not.toContain("fucking");
+  });
+
+  test("preserves @handles that contain profanity-like strings", () => {
+    const result = transformText("Message @ass-istant about this");
+
+    expect(result.transformed).toBe("Message @ass-istant about this");
+    expect(result.changeCount).toBe(0);
+  });
+
+  test("preserves #channels with profanity adjacent", () => {
+    const result = transformText("Post this shit in #general");
+
+    expect(result.transformed).toContain("#general");
+    expect(result.transformed).not.toContain("shit");
+  });
+
+  test("preserves #channels that contain profanity-like strings", () => {
+    const result = transformText("Check #damn-updates for info");
+
+    expect(result.transformed).toBe("Check #damn-updates for info");
+    expect(result.changeCount).toBe(0);
+  });
+
+  test("preserves multiple protected tokens in same text", () => {
+    const result = transformText(
+      "This is bullshit @alice, check https://example.com and post in #team",
+    );
+
+    expect(result.transformed).toContain("@alice");
+    expect(result.transformed).toContain("https://example.com");
+    expect(result.transformed).toContain("#team");
+    expect(result.transformed).not.toContain("bullshit");
+  });
+
+  test("preserves http URLs (not just https)", () => {
+    const result = transformText(
+      "Damn, see http://example.org/shit for details",
+    );
+
+    expect(result.transformed).toContain("http://example.org/shit");
+    expect(result.transformed).not.toContain("Damn");
+  });
+
+  test("handles profanity between protected tokens", () => {
+    const result = transformText("From @alice to @bob: this is shit");
+
+    expect(result.transformed).toContain("@alice");
+    expect(result.transformed).toContain("@bob");
+    expect(result.transformed).not.toContain("shit");
+  });
+});
+
 describe("integration: full text transformation", () => {
   test("handles README example input", () => {
     const input =
