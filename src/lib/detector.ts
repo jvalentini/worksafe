@@ -508,9 +508,152 @@ export function hasProfanity(text: string): boolean {
   return obscenityMatcher.hasMatch(text);
 }
 
+/**
+ * Tokenize text into tokens with position tracking.
+ * Protected tokens (URLs, @handles, #channels) are marked and act as barriers.
+ */
+export function tokenize(text: string, maskedText: string): Token[] {
+  const tokens: Token[] = [];
+  const protectedPattern = /https?:\/\/[^\s]+|@[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+/g;
+  const protectedRanges: Array<{ start: number; end: number }> = [];
+
+  // Find all protected token ranges
+  let match = protectedPattern.exec(text);
+  while (match !== null) {
+    protectedRanges.push({
+      start: match.index,
+      end: match.index + match[0].length,
+    });
+    match = protectedPattern.exec(text);
+  }
+
+  // Check if position is in a protected range
+  const isInProtectedRange = (pos: number): boolean => {
+    return protectedRanges.some(
+      (range) => pos >= range.start && pos < range.end,
+    );
+  };
+
+  // Split on word boundaries while tracking positions
+  const wordPattern = /\b[\w'-]+\b/g;
+  let wordMatch = wordPattern.exec(text);
+
+  while (wordMatch !== null) {
+    const raw = wordMatch[0];
+    const startIndex = wordMatch.index;
+    const endIndex = startIndex + raw.length;
+
+    // Check if this token is in an excluded zone
+    const maskedSubstring = maskedText.slice(startIndex, endIndex);
+    const isInExcludedZone = maskedSubstring !== raw;
+
+    // Only include tokens that are in eligible zones
+    if (!isInExcludedZone) {
+      const isProtected = isInProtectedRange(startIndex);
+      tokens.push({
+        raw,
+        normalized: raw.toLowerCase(),
+        startIndex,
+        endIndex,
+        isProtected,
+      });
+    }
+
+    wordMatch = wordPattern.exec(text);
+  }
+
+  return tokens;
+}
+
+/**
+ * Compute adjacency score for a pair of token lists within a sliding window.
+ * Returns the highest score found, or null if no matches within window.
+ *
+ * Score formula: 1 / (1 + distance)
+ * - Distance 0 (adjacent): score = 1.0
+ * - Distance 1 (1 token apart): score = 0.5
+ * - Distance 2 (2 tokens apart): score = 0.33
+ * - etc.
+ *
+ * Protected tokens act as barriers: we cannot match across them.
+ */
+export function computeAdjacencyScore(
+  tokens: Token[],
+  rule: AdjacencyRule,
+): AdjacencyScore | null {
+  const windowSize = rule.maxDistance;
+  let bestScore: AdjacencyScore | null = null;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const token = tokens[i];
+    if (!token) continue;
+
+    // Check if this is a trigger token
+    if (!rule.triggerTokens.includes(token.normalized)) {
+      continue;
+    }
+
+    // Look ahead within window for target tokens
+    for (let j = i + 1; j < tokens.length; j++) {
+      const targetToken = tokens[j];
+      if (!targetToken) break;
+
+      const distance = j - i - 1;
+
+      if (distance > windowSize) {
+        break;
+      }
+
+      // Protected tokens are barriers - stop scanning
+      if (targetToken.isProtected) {
+        break;
+      }
+
+      // Check if this is a target token
+      if (rule.targetTokens.includes(targetToken.normalized)) {
+        const score = 1 / (1 + distance);
+
+        if (bestScore === null || score > bestScore.score) {
+          bestScore = {
+            score,
+            matchedTrigger: token.normalized,
+            matchedTarget: targetToken.normalized,
+            triggerIndex: i,
+            targetIndex: j,
+          };
+        }
+      }
+    }
+  }
+
+  return bestScore;
+}
+
 export interface SentenceSpan {
   startIndex: number;
   endIndex: number;
+}
+
+export interface Token {
+  raw: string;
+  normalized: string;
+  startIndex: number;
+  endIndex: number;
+  isProtected: boolean;
+}
+
+export interface AdjacencyRule {
+  triggerTokens: string[];
+  targetTokens: string[];
+  maxDistance: number;
+}
+
+export interface AdjacencyScore {
+  score: number;
+  matchedTrigger: string;
+  matchedTarget: string;
+  triggerIndex: number;
+  targetIndex: number;
 }
 
 export function segmentSentences(text: string): SentenceSpan[] {
@@ -589,6 +732,7 @@ function detectClauseRewrites(
   maskedText: string,
 ): ClauseRewriteResult {
   const sentences = segmentSentences(text);
+  const tokens = tokenize(text, maskedText);
 
   const insultTerms = Object.keys(insultReplacements);
   const negativeTerms = [
@@ -605,6 +749,21 @@ function detectClauseRewrites(
     "pathetic",
   ];
 
+  const ADJACENCY_THRESHOLD = 0.2;
+  const DEFAULT_WINDOW_SIZE = 6;
+
+  const attackRule: AdjacencyRule = {
+    triggerTokens: ["you", "your"],
+    targetTokens: insultTerms,
+    maxDistance: DEFAULT_WINDOW_SIZE,
+  };
+
+  const frustrationRule: AdjacencyRule = {
+    triggerTokens: ["this", "that", "it"],
+    targetTokens: negativeTerms,
+    maxDistance: DEFAULT_WINDOW_SIZE,
+  };
+
   const candidates: SentenceCandidate[] = [];
   const skippedRanges: Array<{ startIndex: number; endIndex: number }> = [];
 
@@ -620,20 +779,22 @@ function detectClauseRewrites(
     const hasProtectedTokens =
       /https?:\/\/|@[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+/.test(sentenceText);
 
-    const hasYouYour = /\b(you|your)\b/.test(lowerSentence);
-    const hasInsult = insultTerms.some((term) =>
-      new RegExp(`\\b${term}\\b`).test(lowerSentence),
+    const sentenceTokens = tokens.filter(
+      (t) =>
+        t.startIndex >= sentence.startIndex && t.endIndex <= sentence.endIndex,
     );
 
-    const isAttackPattern = hasYouYour && hasInsult;
-
-    const hasThisThatIt = /\b(this|that|it)\b/.test(lowerSentence);
-    const hasCopula = /\b(is|was|are|were)\b/.test(lowerSentence);
-    const hasNegative = negativeTerms.some((term) =>
-      new RegExp(`\\b${term}\\b`).test(lowerSentence),
+    const attackScore = computeAdjacencyScore(sentenceTokens, attackRule);
+    const frustrationScore = computeAdjacencyScore(
+      sentenceTokens,
+      frustrationRule,
     );
 
-    const isFrustrationPattern = hasThisThatIt && hasCopula && hasNegative;
+    const isAttackPattern =
+      attackScore !== null && attackScore.score >= ADJACENCY_THRESHOLD;
+    const isFrustrationPattern =
+      frustrationScore !== null &&
+      frustrationScore.score >= ADJACENCY_THRESHOLD;
 
     if ((isAttackPattern || isFrustrationPattern) && hasProtectedTokens) {
       skippedRanges.push({
