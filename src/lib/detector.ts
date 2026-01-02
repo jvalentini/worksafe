@@ -540,7 +540,7 @@ function levenshteinDistance(a: string, b: string): number {
   return lastRow?.[a.length] ?? Number.MAX_SAFE_INTEGER;
 }
 
-function isSubstringOfSafeWord(word: string, targetTerm: string): boolean {
+function isSubstringOfSafeWord(word: string, _targetTerm: string): boolean {
   const safeWords = extraWhitelistedTerms;
 
   for (const safeWord of safeWords) {
