@@ -1,0 +1,235 @@
+<template>
+  <div class="app-container">
+    <TPSHeader />
+
+    <main class="main-content">
+      <div class="input-section">
+        <PostItNote color="yellow" :rotate="-2">
+          <strong>📝 INPUT</strong><br/>
+          Speak or type your raw text
+        </PostItNote>
+
+        <div class="input-tabs">
+          <button 
+            class="tab-btn" 
+            :class="{ active: inputMode === 'voice' }"
+            @click="setInputMode('voice')"
+          >
+            🎤 VOICE INPUT
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ active: inputMode === 'text' }"
+            @click="setInputMode('text')"
+          >
+            ⌨️ TEXT INPUT
+          </button>
+        </div>
+
+        <VoiceInput />
+        <TextInput />
+      </div>
+
+      <SettingsPanel />
+
+      <div class="output-section">
+        <PostItNote color="green" :rotate="1">
+          <strong>✅ OUTPUT</strong><br/>
+          Professional & TPS compliant
+        </PostItNote>
+
+        <OutputPanel />
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <span class="footer-badge">◉ INTERNAL USE ONLY</span>
+          <span class="footer-divider">|</span>
+          <span class="footer-text">AUTHORIZED PERSONNEL ONLY</span>
+        </div>
+        <div class="footer-right">
+          <span class="footer-text">ALL PROCESSING LOGGED</span>
+          <span class="footer-divider">|</span>
+          <span class="footer-badge tps">TPS REPORT COMPLIANT</span>
+        </div>
+      </div>
+      <div class="coffee-stain"></div>
+    </footer>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { onMounted } from "vue";
+import { initApp, inputMode } from "$lib/state";
+
+function _setInputMode(mode: "voice" | "text") {
+  inputMode.value = mode;
+}
+
+onMounted(() => {
+  initApp();
+});
+</script>
+
+<style scoped>
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.input-section {
+  margin-bottom: 1.5rem;
+}
+
+.input-section > :deep(.postit) {
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.input-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.875rem 1rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
+  color: #a8a8a8;
+  border: 2px solid #4a4a4a;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tab-btn:first-child {
+  border-right: none;
+}
+
+.tab-btn.active {
+  background: linear-gradient(180deg, #b22222 0%, #8b0000 100%);
+  color: white;
+  border-color: #8b0000;
+}
+
+.tab-btn:hover:not(.active) {
+  background: linear-gradient(180deg, #6a6a6a 0%, #5a5a5a 100%);
+  color: #c9b896;
+}
+
+.output-section {
+  margin-top: 2rem;
+}
+
+.output-section > :deep(.postit) {
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.app-footer {
+  background: linear-gradient(180deg, #3d3d3d 0%, #2a2a2a 100%);
+  border-top: 4px solid #5a5a5a;
+  padding: 1rem 2rem;
+  position: relative;
+  margin-left: -50px;
+  margin-right: -50px;
+  padding-left: calc(50px + 2rem);
+  padding-right: calc(50px + 2rem);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.footer-left,
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-badge {
+  font-family: 'VT323', monospace;
+  font-size: 0.75rem;
+  color: #ff6b6b;
+  letter-spacing: 0.15em;
+}
+
+.footer-badge.tps {
+  color: #00ff41;
+}
+
+.footer-divider {
+  color: #5a5a5a;
+}
+
+.footer-text {
+  font-family: 'VT323', monospace;
+  font-size: 0.7rem;
+  color: #7a7a7a;
+  letter-spacing: 0.1em;
+}
+
+.coffee-stain {
+  position: absolute;
+  bottom: 10px;
+  right: 80px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 25%,
+    rgba(139, 90, 43, 0.06) 30%,
+    rgba(139, 90, 43, 0.1) 40%,
+    rgba(139, 90, 43, 0.04) 55%,
+    transparent 65%
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .app-container {
+    padding-left: 25px;
+    padding-right: 25px;
+  }
+
+  .app-footer {
+    margin-left: -25px;
+    margin-right: -25px;
+    padding-left: calc(25px + 1rem);
+    padding-right: calc(25px + 1rem);
+  }
+
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-left,
+  .footer-right {
+    justify-content: center;
+  }
+}
+</style>
