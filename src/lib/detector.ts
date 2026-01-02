@@ -656,6 +656,65 @@ export interface AdjacencyScore {
   targetIndex: number;
 }
 
+export interface MultiTokenMatch {
+  score: number;
+  matchedTokens: string[];
+  startIndex: number;
+  endIndex: number;
+}
+
+export function findMultiTokenSequence(
+  tokens: Token[],
+  sequence: string[],
+  maxGaps: number,
+): MultiTokenMatch | null {
+  if (sequence.length === 0) return null;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const firstToken = tokens[i];
+    if (!firstToken) continue;
+
+    if (firstToken.normalized !== sequence[0]) continue;
+
+    let seqIdx = 1;
+    let tokenIdx = i + 1;
+    let gapsUsed = 0;
+
+    while (seqIdx < sequence.length && tokenIdx < tokens.length) {
+      const token = tokens[tokenIdx];
+      if (!token) break;
+
+      if (token.isProtected) break;
+
+      if (token.normalized === sequence[seqIdx]) {
+        seqIdx++;
+        tokenIdx++;
+      } else {
+        gapsUsed++;
+        if (gapsUsed > maxGaps) break;
+        tokenIdx++;
+      }
+    }
+
+    if (seqIdx === sequence.length) {
+      const endToken = tokens[tokenIdx - 1];
+      if (!endToken) continue;
+
+      const totalDistance = tokenIdx - i - 1;
+      const score = 1 / (1 + totalDistance - sequence.length + 1);
+
+      return {
+        score,
+        matchedTokens: sequence,
+        startIndex: i,
+        endIndex: tokenIdx - 1,
+      };
+    }
+  }
+
+  return null;
+}
+
 export function segmentSentences(text: string): SentenceSpan[] {
   const maskedText = createMaskedText(text);
   const spans: SentenceSpan[] = [];
@@ -764,8 +823,84 @@ function detectClauseRewrites(
     maxDistance: DEFAULT_WINDOW_SIZE,
   };
 
+  const paJustCheckingRule: AdjacencyRule = {
+    triggerTokens: ["just"],
+    targetTokens: ["checking"],
+    maxDistance: 3,
+  };
+
+  const paPerEmailRule: AdjacencyRule = {
+    triggerTokens: ["per"],
+    targetTokens: ["my"],
+    maxDistance: 3,
+  };
+
+  const paFriendlyReminderRule: AdjacencyRule = {
+    triggerTokens: ["friendly"],
+    targetTokens: ["reminder"],
+    maxDistance: 2,
+  };
+
   const candidates: SentenceCandidate[] = [];
   const skippedRanges: Array<{ startIndex: number; endIndex: number }> = [];
+  const passiveAggressiveDetections: Detection[] = [];
+
+  const paSequences = [
+    {
+      tokens: ["just", "checking", "in"],
+      replacement: "following up",
+      exactPattern: /\bjust checking in\b/i,
+    },
+    {
+      tokens: ["per", "my", "last", "email"],
+      replacement: "as I mentioned",
+      exactPattern: /\bper my last email\b/i,
+    },
+    {
+      tokens: ["friendly", "reminder"],
+      replacement: "reminder",
+      exactPattern: /\bfriendly reminder\b/i,
+    },
+  ];
+
+  for (const paSeq of paSequences) {
+    const match = findMultiTokenSequence(tokens, paSeq.tokens, 3);
+    if (match && match.score >= ADJACENCY_THRESHOLD) {
+      const startToken = tokens[match.startIndex];
+      const endToken = tokens[match.endIndex];
+
+      if (!startToken || !endToken) continue;
+
+      const hasProtectedTokensInRange = tokens
+        .slice(match.startIndex, match.endIndex + 1)
+        .some((t) => t.isProtected);
+
+      if (hasProtectedTokensInRange) continue;
+
+      const detectionStart = startToken.startIndex;
+      const detectionEnd = endToken.endIndex;
+
+      const original = text.slice(detectionStart, detectionEnd);
+      const maskedOriginal = maskedText.slice(detectionStart, detectionEnd);
+
+      if (original !== maskedOriginal) continue;
+
+      if (paSeq.exactPattern.test(original)) continue;
+
+      passiveAggressiveDetections.push({
+        type: "passive-aggressive",
+        original,
+        replacement: matchPhraseCase(
+          text,
+          detectionStart,
+          original,
+          paSeq.replacement,
+        ),
+        startIndex: detectionStart,
+        endIndex: detectionEnd,
+      });
+    }
+  }
 
   for (const sentence of sentences) {
     const sentenceText = text.slice(sentence.startIndex, sentence.endIndex);
@@ -831,13 +966,13 @@ function detectClauseRewrites(
   }
 
   if (candidates.length === 0) {
-    return { rewrites: [], skippedRanges };
+    return { rewrites: passiveAggressiveDetections, skippedRanges };
   }
 
   const groups: SentenceCandidate[][] = [];
   const firstCandidate = candidates[0];
   if (!firstCandidate) {
-    return { rewrites: [], skippedRanges };
+    return { rewrites: passiveAggressiveDetections, skippedRanges };
   }
 
   let currentGroup: SentenceCandidate[] = [firstCandidate];
@@ -904,5 +1039,8 @@ function detectClauseRewrites(
     });
   }
 
-  return { rewrites, skippedRanges };
+  return {
+    rewrites: [...passiveAggressiveDetections, ...rewrites],
+    skippedRanges,
+  };
 }
