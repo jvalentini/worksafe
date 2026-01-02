@@ -190,15 +190,15 @@ function createMaskedText(text: string): string {
 
     if (line.trimStart().startsWith("```")) {
       inFencedBlock = !inFencedBlock;
-      for (let i = lineStart; i <= lineEnd; i++) {
+      for (let i = lineStart; i <= lineEnd && i < text.length; i++) {
         eligible[i] = false;
       }
     } else if (line.startsWith(">")) {
-      for (let i = lineStart; i <= lineEnd; i++) {
+      for (let i = lineStart; i <= lineEnd && i < text.length; i++) {
         eligible[i] = false;
       }
     } else if (inFencedBlock) {
-      for (let i = lineStart; i <= lineEnd; i++) {
+      for (let i = lineStart; i <= lineEnd && i < text.length; i++) {
         eligible[i] = false;
       }
     }
@@ -544,7 +544,7 @@ function levenshteinDistance(a: string, b: string): number {
   return lastRow?.[a.length] ?? Number.MAX_SAFE_INTEGER;
 }
 
-function isSubstringOfSafeWord(word: string, _targetTerm: string): boolean {
+function isSubstringOfSafeWord(word: string): boolean {
   const safeWords = extraWhitelistedTerms;
 
   for (const safeWord of safeWords) {
@@ -611,7 +611,7 @@ function findClosestReplacement(word: string): string | null {
 
     if (distance <= MAX_FUZZY_EDIT_DISTANCE && distance > 0) {
       if (bestMatch === null || distance < bestMatch.distance) {
-        if (!isSubstringOfSafeWord(cleaned, term)) {
+        if (!isSubstringOfSafeWord(cleaned)) {
           bestMatch = { key: term, distance };
         }
       }

@@ -8,6 +8,22 @@ interface ChangeLog {
   replacement: string;
 }
 
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch (err) {
+    console.warn(`Failed to write ${key} to localStorage`, err);
+  }
+}
+
 export const inputMode = ref<"voice" | "text">("voice");
 export const aiMode = ref(false);
 export const sarcasmMode = ref(false);
@@ -25,8 +41,8 @@ let speechHandler: SpeechHandler | null = null;
 
 export function initApp() {
   if (typeof window !== "undefined") {
-    apiKey.value = localStorage.getItem("worksafe-api-key") || "";
-    const savedSarcasmMode = localStorage.getItem("worksafe-sarcasm-mode");
+    apiKey.value = safeGetItem("worksafe-api-key") || "";
+    const savedSarcasmMode = safeGetItem("worksafe-sarcasm-mode");
     sarcasmMode.value = savedSarcasmMode === "true";
     initSpeech();
   }
@@ -51,12 +67,12 @@ function initSpeech() {
 
 export function saveApiKey(key: string) {
   apiKey.value = key;
-  localStorage.setItem("worksafe-api-key", key);
+  safeSetItem("worksafe-api-key", key);
 }
 
 export function saveSarcasmMode(enabled: boolean) {
   sarcasmMode.value = enabled;
-  localStorage.setItem("worksafe-sarcasm-mode", String(enabled));
+  safeSetItem("worksafe-sarcasm-mode", String(enabled));
 }
 
 export async function toggleRecording() {

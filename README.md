@@ -19,7 +19,10 @@ With AI mode enabled:
 - **Text Input** - Paste or type text directly
 - **Dictionary Mode** - Instant, local-only text transformation
 - **AI Mode** - Context-aware rewriting via OpenAI (optional, requires API key)
+- **Sarcasm Detection** - Detect and rewrite sarcastic language patterns (dictionary mode only)
+- **Fuzzy Matching** - Catch variations of profanity and insults with intelligent matching
 - **Multiple Output Formats** - Plain text and email-ready formatting
+- **Compact Settings Panel** - Right sidebar on desktop, collapsible drawer on mobile
 - **Privacy-Focused** - Dictionary mode runs entirely in your browser
 
 ### What Gets Filtered
