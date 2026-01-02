@@ -100,7 +100,7 @@ const detectionTypePriority: Record<Detection["type"], number> = {
 };
 
 function createMaskedText(text: string): string {
-  const eligible = new Array(text.length).fill(true);
+  const eligible = Array.from({ length: text.length }, () => true);
 
   let pos = 0;
   let inFencedBlock = false;

@@ -2,30 +2,30 @@
   <section class="settings-section">
     <div class="flair-toggle-container">
       <label class="ai-flair-toggle" :class="{ active: aiMode }" @click="toggleAiMode">
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           :checked="aiMode"
           @change="toggleAiMode"
           class="sr-only"
         />
-        
+
         <!-- Lumbergh photo background -->
         <div class="flair-circle" :class="{ active: aiMode }">
-          <img 
-            src="/lundberg.png" 
-            alt="Bill Lumbergh" 
+          <img
+            src="/lundberg.png"
+            alt="Bill Lumbergh"
             class="lumbergh-photo"
           />
         </div>
-        
+
         <!-- Center content -->
         <div class="flair-content">
           <div class="flair-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
         </div>
       </label>
-      
+
       <div class="toggle-hint">
-        <span class="hint-text">Click to {{ aiMode ? 'disable' : 'enable' }} AI-powered rewriting</span>
+        <span class="hint-text">Click to {{ aiMode ? 'disable' : 'enable' }} Lundberg-powered rewriting</span>
       </div>
     </div>
 
@@ -38,8 +38,8 @@
         <div class="config-form">
           <label class="form-field">
             <span class="field-label">OPENAI API KEY</span>
-            <input 
-              type="password" 
+            <input
+              type="password"
               v-model="apiKeyInput"
               placeholder="sk-..."
               class="api-input"
@@ -133,7 +133,7 @@ function handleSaveKey() {
   border-radius: 50%;
   background: linear-gradient(135deg, #6a6a6a 0%, #4a4a4a 100%);
   padding: 8px;
-  box-shadow: 
+  box-shadow:
     0 6px 20px rgba(0,0,0,0.4),
     inset 0 2px 4px rgba(255,255,255,0.2),
     inset 0 -2px 4px rgba(0,0,0,0.3);
@@ -143,7 +143,7 @@ function handleSaveKey() {
 
 .flair-circle.active {
   background: linear-gradient(135deg, #dc143c 0%, #b71c1c 100%);
-  box-shadow: 
+  box-shadow:
     0 8px 30px rgba(183,28,28,0.6),
     inset 0 2px 4px rgba(255,255,255,0.3),
     inset 0 -2px 4px rgba(0,0,0,0.4);
@@ -151,14 +151,14 @@ function handleSaveKey() {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { 
-    box-shadow: 
+  0%, 100% {
+    box-shadow:
       0 8px 30px rgba(183,28,28,0.6),
       inset 0 2px 4px rgba(255,255,255,0.3),
       inset 0 -2px 4px rgba(0,0,0,0.4);
   }
-  50% { 
-    box-shadow: 
+  50% {
+    box-shadow:
       0 12px 40px rgba(183,28,28,0.9),
       inset 0 2px 4px rgba(255,255,255,0.3),
       inset 0 -2px 4px rgba(0,0,0,0.4);
@@ -171,7 +171,7 @@ function handleSaveKey() {
   object-fit: cover;
   border-radius: 50%;
   border: 4px solid #ffffff;
-  box-shadow: 
+  box-shadow:
     inset 0 2px 6px rgba(0,0,0,0.2),
     0 2px 8px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
@@ -218,7 +218,7 @@ function handleSaveKey() {
   background: linear-gradient(145deg, #dc143c 0%, #b71c1c 100%);
   color: #fff;
   border: 2px solid #8b0000;
-  box-shadow: 
+  box-shadow:
     0 3px 8px rgba(183,28,28,0.5),
     inset 0 1px 0 rgba(255,255,255,0.3);
   text-shadow: 0 2px 4px rgba(0,0,0,0.5);
@@ -341,21 +341,21 @@ function handleSaveKey() {
     height: 160px;
     margin-bottom: 35px;
   }
-  
+
   .flair-status {
     font-size: 0.9rem;
   }
-  
+
   .settings-row {
     flex-direction: column;
     padding: 0 1rem 1rem;
   }
-  
+
   .config-form {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .api-input {
     width: 100%;
   }

@@ -184,7 +184,7 @@ describe("excluded zone masking", () => {
 
     expect(detections[1]?.original).toBe("bullshit");
     expect(
-      input.slice(detections[1]!.startIndex, detections[1]!.endIndex),
+      input.slice(detections[1]?.startIndex, detections[1]?.endIndex),
     ).toBe("bullshit");
   });
 });
@@ -196,10 +196,10 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(2);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "First sentence.",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "Second sentence.",
     );
   });
@@ -210,7 +210,7 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(1);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(input);
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(input);
   });
 
   test("does not split on punctuation inside URLs", () => {
@@ -219,7 +219,7 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(1);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(input);
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(input);
   });
 
   test("protects @handles and #channels from being split", () => {
@@ -228,7 +228,7 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(1);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(input);
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(input);
   });
 
   test("does not produce spans crossing quoted email thread lines", () => {
@@ -237,10 +237,10 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(2);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "This is my text.\n",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "More of my text.",
     );
   });
@@ -251,10 +251,10 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(2);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "Text before.\n",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "Text after.",
     );
   });
@@ -266,10 +266,10 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(2);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "Check https://example.com.\n",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "Final sentence!",
     );
   });
@@ -280,13 +280,13 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(3);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "Question?",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "Exclamation!",
     );
-    expect(input.slice(spans[2]!.startIndex, spans[2]!.endIndex)).toBe(
+    expect(input.slice(spans[2]?.startIndex, spans[2]?.endIndex)).toBe(
       "Statement.",
     );
   });
@@ -297,13 +297,13 @@ describe("segmentSentences", () => {
     const spans = segmentSentences(input);
 
     expect(spans).toHaveLength(3);
-    expect(input.slice(spans[0]!.startIndex, spans[0]!.endIndex)).toBe(
+    expect(input.slice(spans[0]?.startIndex, spans[0]?.endIndex)).toBe(
       "First line\n",
     );
-    expect(input.slice(spans[1]!.startIndex, spans[1]!.endIndex)).toBe(
+    expect(input.slice(spans[1]?.startIndex, spans[1]?.endIndex)).toBe(
       "Second line\n",
     );
-    expect(input.slice(spans[2]!.startIndex, spans[2]!.endIndex)).toBe(
+    expect(input.slice(spans[2]?.startIndex, spans[2]?.endIndex)).toBe(
       "Third line",
     );
   });
