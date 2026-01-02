@@ -2,62 +2,64 @@
   <div class="app-container">
     <TPSHeader />
 
-    <main class="main-content">
-      <!-- Scattered Flair Pins -->
-      <div class="flair-pins-scattered">
-        <FlairBadge
-          emoji="☕"
-          color="orange"
-          title="I need my coffee"
-          class="flair-scattered flair-1"
-        />
-        <FlairBadge
-          emoji="📋"
-          color="blue"
-          title="TPS Reports"
-          class="flair-scattered flair-2"
-        />
-        <FlairBadge
-          emoji="💼"
-          color="purple"
-          title="Case of the Mondays"
-          class="flair-scattered flair-4"
-        />
-        <FlairBadge
-          emoji="🖨️"
-          color="green"
-          title="PC LOAD LETTER"
-          class="flair-scattered flair-5"
-        />
-        <FlairBadge
-          emoji="⭐"
-          color="yellow"
-          title="15 pieces of flair!"
-          class="flair-scattered flair-6"
-        />
-      </div>
+    <div class="app-layout">
+      <main class="main-content">
+        <!-- Scattered Flair Pins -->
+        <div class="flair-pins-scattered">
+          <FlairBadge
+            emoji="☕"
+            color="orange"
+            title="I need my coffee"
+            class="flair-scattered flair-1"
+          />
+          <FlairBadge
+            emoji="📋"
+            color="blue"
+            title="TPS Reports"
+            class="flair-scattered flair-2"
+          />
+          <FlairBadge
+            emoji="💼"
+            color="purple"
+            title="Case of the Mondays"
+            class="flair-scattered flair-4"
+          />
+          <FlairBadge
+            emoji="🖨️"
+            color="green"
+            title="PC LOAD LETTER"
+            class="flair-scattered flair-5"
+          />
+          <FlairBadge
+            emoji="⭐"
+            color="yellow"
+            title="15 pieces of flair!"
+            class="flair-scattered flair-6"
+          />
+        </div>
+
+        <div class="input-section">
+          <PostItNote color="red" :rotate="-2">
+            <strong>📝 INPUT</strong><br/>
+            Speak or type your raw text
+          </PostItNote>
+
+          <VoiceInput @switch-mode="setInputMode" />
+          <TextInput @switch-mode="setInputMode" />
+        </div>
+
+        <div id="output-section" class="output-section">
+          <PostItNote color="green" :rotate="-1.5">
+            <strong>✅ OUTPUT</strong><br/>
+            Professional & TPS compliant
+          </PostItNote>
+
+          <OutputPanel />
+        </div>
+      </main>
 
       <SettingsPanel />
-
-      <div class="input-section">
-        <PostItNote color="red" :rotate="-2">
-          <strong>📝 INPUT</strong><br/>
-          Speak or type your raw text
-        </PostItNote>
-
-        <VoiceInput @switch-mode="setInputMode" />
-        <TextInput @switch-mode="setInputMode" />
-      </div>
-
-      <div id="output-section" class="output-section">
-        <PostItNote color="green" :rotate="1">
-          <strong>✅ OUTPUT</strong><br/>
-          Professional & TPS compliant
-        </PostItNote>
-
-        <OutputPanel />
-      </div>
-    </main>
+    </div>
 
     <footer class="app-footer">
       <div class="footer-content">
@@ -110,13 +112,20 @@ onMounted(() => {
   padding-right: 50px;
 }
 
-.main-content {
+.app-layout {
   flex: 1;
-  width: 100%;
-  max-width: 900px;
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 2rem;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.main-content {
   position: relative;
+  padding: 0 1.5rem;
 }
 
 .flair-pins-scattered {
@@ -140,8 +149,8 @@ onMounted(() => {
 }
 
 .flair-2 {
-  top: 280px;
-  right: -70px;
+  top: 750px;
+  left: -70px;
   transform: rotate(22deg);
 }
 
@@ -178,8 +187,6 @@ onMounted(() => {
   display: inline-block;
 }
 
-
-
 .output-section {
   margin-top: 2rem;
 }
@@ -206,7 +213,7 @@ onMounted(() => {
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -257,10 +264,15 @@ onMounted(() => {
   pointer-events: none;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .app-container {
     padding-left: 25px;
     padding-right: 25px;
+  }
+
+  .app-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   .app-footer {
