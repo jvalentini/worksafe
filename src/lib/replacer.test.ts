@@ -839,6 +839,165 @@ describe("clause rewrites: integration with word replacements", () => {
   });
 });
 
+describe("M5: sarcasm detection (opt-in)", () => {
+  test("does NOT detect sarcasm when sarcasmMode is OFF", () => {
+    const result = transformText("Oh, great...", { sarcasmMode: false });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("Oh, great...");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("does NOT detect sarcasm by default (when no options passed)", () => {
+    const result = transformText("Wow, brilliant...");
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("Wow, brilliant...");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("detects 'oh, great...' when sarcasmMode is ON", () => {
+    const result = transformText("Oh, great...", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+    expect(result.changes[0]?.original).toBe("Oh, great...");
+    expect(result.transformed).not.toContain("Oh, great...");
+    expect(result.transformed).toContain("This is concerning");
+  });
+
+  test("detects 'wow, brilliant...' when sarcasmMode is ON", () => {
+    const result = transformText("Wow, brilliant...", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+    expect(result.transformed).toContain("I'd like to discuss this approach");
+  });
+
+  test("detects 'yeah, sure...' when sarcasmMode is ON", () => {
+    const result = transformText("Yeah, sure...", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+    expect(result.transformed).toContain("I understand");
+  });
+
+  test("detects 'thanks for nothing' when sarcasmMode is ON", () => {
+    const result = transformText("Thanks for nothing", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+    expect(result.transformed).toContain(
+      "I would have appreciated more support",
+    );
+  });
+
+  test("detects 'real genius' when sarcasmMode is ON", () => {
+    const result = transformText("Real genius move", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+    expect(result.changes[0]?.original).toBe("Real genius");
+    expect(result.transformed).toBe("An interesting approach move");
+  });
+
+  test("NEGATIVE: does NOT rewrite genuine praise 'great work' even with sarcasmMode ON", () => {
+    const result = transformText("Great work on the project!", {
+      sarcasmMode: true,
+    });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("Great work on the project!");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("NEGATIVE: does NOT rewrite genuine praise 'wonderful job' even with sarcasmMode ON", () => {
+    const result = transformText("Wonderful job, team!", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("Wonderful job, team!");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("NEGATIVE: does NOT rewrite 'brilliant idea' without ellipsis even with sarcasmMode ON", () => {
+    const result = transformText("That's a brilliant idea!", {
+      sarcasmMode: true,
+    });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("That's a brilliant idea!");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("NEGATIVE: does NOT rewrite neutral 'yeah, sure' without ellipsis even with sarcasmMode ON", () => {
+    const result = transformText("Yeah, sure, I can help with that.", {
+      sarcasmMode: true,
+    });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toBe("Yeah, sure, I can help with that.");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("respects excluded zones (code blocks) even with sarcasmMode ON", () => {
+    const result = transformText("```\nOh, great...\n```", {
+      sarcasmMode: true,
+    });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toContain("Oh, great...");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("respects excluded zones (quoted text) even with sarcasmMode ON", () => {
+    const result = transformText("> Oh, great...", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(0);
+    expect(result.transformed).toContain("> Oh, great...");
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("does not detect across protected tokens (URLs)", () => {
+    const result = transformText("Oh https://example.com great...", {
+      sarcasmMode: true,
+    });
+
+    const sarcasmChange = result.changes.find((c) => c.type === "sarcasm");
+    expect(sarcasmChange).toBeUndefined();
+  });
+
+  test("preserves case when replacing sarcasm", () => {
+    const result = transformText("OH, GREAT...", { sarcasmMode: true });
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("sarcasm");
+  });
+
+  test("detects multiple sarcastic phrases in one text", () => {
+    const result = transformText(
+      "Oh, great... Real genius move. Thanks for nothing.",
+      { sarcasmMode: true },
+    );
+
+    expect(result.changeCount).toBe(3);
+    expect(result.changes.filter((c) => c.type === "sarcasm")).toHaveLength(3);
+  });
+
+  test("sarcasm summary appears in getChangeSummary", () => {
+    const result = transformText("Oh, great...", { sarcasmMode: true });
+
+    expect(getChangeSummary(result.changes)).toContain("sarcastic phrase");
+  });
+});
+
 describe("integration: full text transformation", () => {
   test("handles README example input with clause rewrites", () => {
     const input =

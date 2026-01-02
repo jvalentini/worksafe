@@ -18,6 +18,7 @@ import {
   persuasionValidationPhrases,
 } from "./dictionaries/persuasion";
 import { profanityReplacements } from "./dictionaries/profanity";
+import { sarcasmPhrases } from "./dictionaries/sarcasm";
 
 export interface Detection {
   type:
@@ -32,7 +33,8 @@ export interface Detection {
     | "persuasion-validation"
     | "persuasion-followups"
     | "clause-rewrite-attack"
-    | "clause-rewrite-frustration";
+    | "clause-rewrite-frustration"
+    | "sarcasm";
   original: string;
   replacement: string;
   startIndex: number;
@@ -70,33 +72,45 @@ const allWordKeys = Object.keys(allWordReplacements).toSorted(
   (a, b) => b.length - a.length,
 );
 
-const phraseGroups: Array<{
+function buildPhraseGroups(sarcasmMode: boolean): Array<{
   type: Detection["type"];
   phrases: PhraseReplacement[];
-}> = [
-  { type: "aggressive", phrases: aggressivePhrases },
-  { type: "passive-aggressive", phrases: passiveAggressivePhrases },
-  { type: "persuasion-hedging", phrases: persuasionHedgingPhrases },
-  { type: "persuasion-apologies", phrases: persuasionApologyPhrases },
-  { type: "persuasion-qualifiers", phrases: persuasionQualifierPhrases },
-  { type: "persuasion-commitments", phrases: persuasionCommitmentPhrases },
-  { type: "persuasion-validation", phrases: persuasionValidationPhrases },
-  { type: "persuasion-followups", phrases: persuasionFollowUpPhrases },
-];
+}> {
+  const groups: Array<{
+    type: Detection["type"];
+    phrases: PhraseReplacement[];
+  }> = [
+    { type: "aggressive", phrases: aggressivePhrases },
+    { type: "passive-aggressive", phrases: passiveAggressivePhrases },
+    { type: "persuasion-hedging", phrases: persuasionHedgingPhrases },
+    { type: "persuasion-apologies", phrases: persuasionApologyPhrases },
+    { type: "persuasion-qualifiers", phrases: persuasionQualifierPhrases },
+    { type: "persuasion-commitments", phrases: persuasionCommitmentPhrases },
+    { type: "persuasion-validation", phrases: persuasionValidationPhrases },
+    { type: "persuasion-followups", phrases: persuasionFollowUpPhrases },
+  ];
+
+  if (sarcasmMode) {
+    groups.push({ type: "sarcasm", phrases: sarcasmPhrases });
+  }
+
+  return groups;
+}
 
 const detectionTypePriority: Record<Detection["type"], number> = {
   "clause-rewrite-attack": 0,
   "clause-rewrite-frustration": 1,
   aggressive: 2,
   "passive-aggressive": 3,
-  "persuasion-hedging": 4,
-  "persuasion-apologies": 5,
-  "persuasion-qualifiers": 6,
-  "persuasion-commitments": 7,
-  "persuasion-validation": 8,
-  "persuasion-followups": 9,
-  profanity: 10,
-  insult: 11,
+  sarcasm: 4,
+  "persuasion-hedging": 5,
+  "persuasion-apologies": 6,
+  "persuasion-qualifiers": 7,
+  "persuasion-commitments": 8,
+  "persuasion-validation": 9,
+  "persuasion-followups": 10,
+  profanity: 11,
+  insult: 12,
 };
 
 function createMaskedText(text: string): string {
@@ -158,7 +172,15 @@ function createMaskedText(text: string): string {
   return masked;
 }
 
-export function detectIssues(text: string): Detection[] {
+export interface DetectionOptions {
+  sarcasmMode?: boolean;
+}
+
+export function detectIssues(
+  text: string,
+  options: DetectionOptions = {},
+): Detection[] {
+  const { sarcasmMode = false } = options;
   const candidates: Detection[] = [];
   const seen = new Set<string>();
 
@@ -202,29 +224,37 @@ export function detectIssues(text: string): Detection[] {
     position += word.length;
   }
 
+  const phraseGroups = buildPhraseGroups(sarcasmMode);
+
   for (const group of phraseGroups) {
     for (const phrase of group.phrases) {
       const regex = new RegExp(phrase.pattern.source, phrase.pattern.flags);
       let match = regex.exec(maskedText);
 
       while (match !== null) {
-        // Extract original phrase from original text using indices
         const originalPhrase = text.slice(
           match.index,
           match.index + match[0].length,
         );
-        addCandidate({
-          type: group.type,
-          original: originalPhrase,
-          replacement: matchPhraseCase(
-            text,
-            match.index,
+        const hasProtectedTokens =
+          /https?:\/\/[^\s]+|@[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+/.test(
             originalPhrase,
-            phrase.replacement,
-          ),
-          startIndex: match.index,
-          endIndex: match.index + match[0].length,
-        });
+          );
+
+        if (!hasProtectedTokens) {
+          addCandidate({
+            type: group.type,
+            original: originalPhrase,
+            replacement: matchPhraseCase(
+              text,
+              match.index,
+              originalPhrase,
+              phrase.replacement,
+            ),
+            startIndex: match.index,
+            endIndex: match.index + match[0].length,
+          });
+        }
 
         match = regex.exec(maskedText);
       }

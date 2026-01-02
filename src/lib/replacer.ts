@@ -1,4 +1,8 @@
-import { type Detection, detectIssues } from "./detector";
+import {
+  type Detection,
+  type DetectionOptions,
+  detectIssues,
+} from "./detector";
 
 export interface TransformResult {
   original: string;
@@ -7,8 +11,11 @@ export interface TransformResult {
   changeCount: number;
 }
 
-export function transformText(text: string): TransformResult {
-  const detections = detectIssues(text);
+export function transformText(
+  text: string,
+  options: DetectionOptions = {},
+): TransformResult {
+  const detections = detectIssues(text, options);
 
   if (detections.length === 0) {
     return {
@@ -81,6 +88,7 @@ export function getChangeSummary(changes: Detection[]): string {
     insult: 0,
     aggressive: 0,
     "passive-aggressive": 0,
+    sarcasm: 0,
     "persuasion-hedging": 0,
     "persuasion-apologies": 0,
     "persuasion-qualifiers": 0,
@@ -113,6 +121,11 @@ export function getChangeSummary(changes: Detection[]): string {
   if (typeCounts["passive-aggressive"] > 0) {
     parts.push(
       `${typeCounts["passive-aggressive"]} passive-aggressive phrase${typeCounts["passive-aggressive"] > 1 ? "s" : ""}`,
+    );
+  }
+  if (typeCounts.sarcasm > 0) {
+    parts.push(
+      `${typeCounts.sarcasm} sarcastic phrase${typeCounts.sarcasm > 1 ? "s" : ""}`,
     );
   }
   if (typeCounts["clause-rewrite-attack"] > 0) {
