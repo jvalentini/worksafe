@@ -9,42 +9,20 @@
           class="sr-only"
         />
         
-        <!-- Star burst background -->
-        <svg class="starburst" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <radialGradient id="purpleGrad" cx="50%" cy="50%">
-              <stop offset="0%" :style="aiMode ? 'stop-color:#9c27b0;stop-opacity:1' : 'stop-color:#6a6a6a;stop-opacity:1'" />
-              <stop offset="100%" :style="aiMode ? 'stop-color:#6a1b9a;stop-opacity:1' : 'stop-color:#4a4a4a;stop-opacity:1'" />
-            </radialGradient>
-          </defs>
-          <g transform="translate(100, 100)">
-            <!-- 16-point starburst with fat rays and small points -->
-            <path v-for="i in 16" :key="i"
-              :d="`M 0 -50 L -12 -35 L 0 -58 L 12 -35 Z`"
-              :transform="`rotate(${i * 22.5})`"
-              fill="url(#purpleGrad)"
-              :opacity="aiMode ? 1 : 0.5"
-            />
-          </g>
-          <!-- Center circle -->
-          <circle cx="100" cy="100" r="60" 
-            :fill="aiMode ? '#8e24aa' : '#5a5a5a'"
-            stroke="#2a2a2a" 
-            stroke-width="3"
+        <!-- Lumbergh photo background -->
+        <div class="flair-circle" :class="{ active: aiMode }">
+          <img 
+            src="/lundberg.png" 
+            alt="Bill Lumbergh" 
+            class="lumbergh-photo"
           />
-          <circle cx="100" cy="100" r="60" 
-            fill="url(#purpleGrad)"
-            opacity="0.6"
-          />
-        </svg>
+        </div>
         
         <!-- Pin backing -->
         <div class="pin-backing"></div>
         
         <!-- Center content -->
         <div class="flair-content">
-          <div class="ai-icon">🤖</div>
-          <div class="flair-text">AI FLAIR</div>
           <div class="flair-status">{{ aiMode ? 'ACTIVE' : 'OFF' }}</div>
         </div>
       </label>
@@ -133,11 +111,12 @@ function handleSaveKey() {
 
 .ai-flair-toggle {
   position: relative;
-  width: 180px;
-  height: 180px;
+  width: 200px;
+  height: 200px;
   cursor: pointer;
   transition: transform 0.3s ease;
   user-select: none;
+  margin-bottom: 40px;
 }
 
 .ai-flair-toggle:hover {
@@ -148,28 +127,62 @@ function handleSaveKey() {
   transform: scale(1.05) rotate(-5deg);
 }
 
-.starburst {
+.flair-circle {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6a6a6a 0%, #4a4a4a 100%);
+  padding: 8px;
+  box-shadow: 
+    0 6px 20px rgba(0,0,0,0.4),
+    inset 0 2px 4px rgba(255,255,255,0.2),
+    inset 0 -2px 4px rgba(0,0,0,0.3);
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.ai-flair-toggle.active .starburst {
-  filter: drop-shadow(0 6px 20px rgba(142,36,170,0.6));
+.flair-circle.active {
+  background: linear-gradient(135deg, #dc143c 0%, #b71c1c 100%);
+  box-shadow: 
+    0 8px 30px rgba(183,28,28,0.6),
+    inset 0 2px 4px rgba(255,255,255,0.3),
+    inset 0 -2px 4px rgba(0,0,0,0.4);
   animation: pulse-glow 2s infinite;
 }
 
 @keyframes pulse-glow {
   0%, 100% { 
-    filter: drop-shadow(0 6px 20px rgba(142,36,170,0.6));
+    box-shadow: 
+      0 8px 30px rgba(183,28,28,0.6),
+      inset 0 2px 4px rgba(255,255,255,0.3),
+      inset 0 -2px 4px rgba(0,0,0,0.4);
   }
   50% { 
-    filter: drop-shadow(0 8px 30px rgba(142,36,170,0.9));
+    box-shadow: 
+      0 12px 40px rgba(183,28,28,0.9),
+      inset 0 2px 4px rgba(255,255,255,0.3),
+      inset 0 -2px 4px rgba(0,0,0,0.4);
   }
+}
+
+.lumbergh-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  box-shadow: 
+    inset 0 2px 6px rgba(0,0,0,0.2),
+    0 2px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+}
+
+.flair-circle.active .lumbergh-photo {
+  border-color: #fff;
+  filter: brightness(1.1);
 }
 
 .pin-backing {
@@ -203,9 +216,9 @@ function handleSaveKey() {
 
 .flair-content {
   position: absolute;
-  top: 50%;
+  bottom: -35px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -214,53 +227,31 @@ function handleSaveKey() {
   pointer-events: none;
 }
 
-.ai-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.25rem;
-  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-  transition: transform 0.3s ease;
-}
-
-.ai-flair-toggle.active .ai-icon {
-  transform: scale(1.1);
-  animation: bounce 0.6s ease;
-}
-
-@keyframes bounce {
-  0%, 100% { transform: scale(1.1); }
-  50% { transform: scale(1.2); }
-}
-
-.flair-text {
-  font-family: 'VT323', monospace;
-  font-size: 1.1rem;
-  font-weight: bold;
-  letter-spacing: 0.15em;
-  color: white;
-  text-shadow: 
-    2px 2px 4px rgba(0,0,0,0.8),
-    0 0 10px rgba(255,255,255,0.5);
-  margin-bottom: 0.25rem;
-}
-
 .flair-status {
   font-family: 'VT323', monospace;
-  font-size: 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
   letter-spacing: 0.2em;
-  padding: 0.15rem 0.5rem;
-  border-radius: 10px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 3px;
   transition: all 0.3s ease;
 }
 
 .ai-flair-toggle:not(.active) .flair-status {
-  background: rgba(0,0,0,0.4);
-  color: #c0c0c0;
+  background: #5a5a5a;
+  color: #a8a8a8;
+  border: 2px solid #4a4a4a;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
 
 .ai-flair-toggle.active .flair-status {
-  background: rgba(255,255,255,0.3);
+  background: linear-gradient(145deg, #dc143c 0%, #b71c1c 100%);
   color: #fff;
-  box-shadow: 0 0 15px rgba(255,255,255,0.5);
+  border: 2px solid #8b0000;
+  box-shadow: 
+    0 3px 8px rgba(183,28,28,0.5),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .toggle-hint {
@@ -376,16 +367,13 @@ function handleSaveKey() {
 
 @media (max-width: 600px) {
   .ai-flair-toggle {
-    width: 150px;
-    height: 150px;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 35px;
   }
   
-  .ai-icon {
-    font-size: 2rem;
-  }
-  
-  .flair-text {
-    font-size: 0.95rem;
+  .flair-status {
+    font-size: 0.9rem;
   }
   
   .settings-row {
