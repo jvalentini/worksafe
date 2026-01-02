@@ -10,6 +10,7 @@ interface ChangeLog {
 
 export const inputMode = ref<"voice" | "text">("voice");
 export const aiMode = ref(false);
+export const sarcasmMode = ref(false);
 export const isRecording = ref(false);
 export const voiceStatus = ref("Ready");
 export const liveTranscript = ref("");
@@ -25,6 +26,8 @@ let speechHandler: SpeechHandler | null = null;
 export function initApp() {
   if (typeof window !== "undefined") {
     apiKey.value = localStorage.getItem("worksafe-api-key") || "";
+    const savedSarcasmMode = localStorage.getItem("worksafe-sarcasm-mode");
+    sarcasmMode.value = savedSarcasmMode === "true";
     initSpeech();
   }
 }
@@ -49,6 +52,11 @@ function initSpeech() {
 export function saveApiKey(key: string) {
   apiKey.value = key;
   localStorage.setItem("worksafe-api-key", key);
+}
+
+export function saveSarcasmMode(enabled: boolean) {
+  sarcasmMode.value = enabled;
+  localStorage.setItem("worksafe-sarcasm-mode", String(enabled));
 }
 
 export async function toggleRecording() {

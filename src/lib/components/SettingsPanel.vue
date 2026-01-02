@@ -30,6 +30,20 @@
     </div>
 
     <div class="settings-row">
+      <div class="sarcasm-toggle-container">
+        <label class="sarcasm-toggle">
+          <input
+            type="checkbox"
+            :checked="sarcasmMode"
+            @change="toggleSarcasmMode"
+          />
+          <span class="toggle-label">Enable sarcasm detection</span>
+        </label>
+        <p class="toggle-description">
+          Detect and rewrite sarcastic language patterns (dictionary mode only)
+        </p>
+      </div>
+
       <details class="api-config">
         <summary>
           <span class="config-icon">⚙️</span>
@@ -59,12 +73,22 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { aiMode, saveApiKey, apiKey } from "$lib/state";
+import {
+  aiMode,
+  saveApiKey,
+  apiKey,
+  sarcasmMode,
+  saveSarcasmMode,
+} from "$lib/state";
 
 const apiKeyInput = ref("");
 
 function toggleAiMode() {
   aiMode.value = !aiMode.value;
+}
+
+function toggleSarcasmMode() {
+  saveSarcasmMode(!sarcasmMode.value);
 }
 
 function handleSaveKey() {
@@ -242,6 +266,41 @@ function handleSaveKey() {
   flex-wrap: wrap;
   gap: 1rem;
   padding: 0 1.5rem 1rem;
+}
+
+.sarcasm-toggle-container {
+  background: #faf8f3;
+  border: 1px solid #c9b896;
+  padding: 1rem;
+  min-width: 250px;
+}
+
+.sarcasm-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  color: #4a4a4a;
+}
+
+.sarcasm-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.toggle-label {
+  letter-spacing: 0.05em;
+}
+
+.toggle-description {
+  margin: 0.5rem 0 0;
+  font-family: 'VT323', monospace;
+  font-size: 0.75rem;
+  color: #6a6a6a;
+  font-style: italic;
 }
 
 .api-config {
