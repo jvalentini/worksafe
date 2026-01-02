@@ -116,7 +116,7 @@ function handleSaveKey() {
   background: transparent;
   border: none;
   padding: 0;
-  margin-top: 2rem;
+  margin-bottom: 2rem;
 }
 
 .flair-toggle-container {

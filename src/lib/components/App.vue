@@ -37,6 +37,8 @@
         />
       </div>
 
+      <SettingsPanel />
+
       <div class="input-section">
         <PostItNote color="red" :rotate="-2">
           <strong>📝 INPUT</strong><br/>
@@ -47,9 +49,7 @@
         <TextInput @switch-mode="setInputMode" />
       </div>
 
-      <SettingsPanel />
-
-      <div class="output-section">
+      <div id="output-section" class="output-section">
         <PostItNote color="green" :rotate="1">
           <strong>✅ OUTPUT</strong><br/>
           Professional & TPS compliant

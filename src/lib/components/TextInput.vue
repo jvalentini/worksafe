@@ -69,6 +69,14 @@ function handleKeyDown(e: KeyboardEvent) {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
     e.preventDefault();
     handleTransform();
+
+    // Scroll to output section
+    setTimeout(() => {
+      const outputSection = document.getElementById("output-section");
+      if (outputSection) {
+        outputSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
   }
 }
 
@@ -227,6 +235,7 @@ function handleTransform() {
   background: rgba(255,255,255,0.4);
   border: 2px solid #d4a700;
   color: #5d4037;
+  caret-color: #dc143c;
   resize: vertical;
   min-height: 180px;
   box-shadow: 

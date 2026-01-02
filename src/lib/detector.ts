@@ -430,7 +430,7 @@ function createObscenityDetection(
   const replacement =
     allWordReplacements[lowerMatch] ||
     findClosestReplacement(lowerMatch) ||
-    "[removed]";
+    "friend";
 
   return {
     type: getWordType(lowerMatch),
