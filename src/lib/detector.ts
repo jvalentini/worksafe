@@ -491,3 +491,66 @@ function capitalizeFirstLetter(value: string): string {
 export function hasProfanity(text: string): boolean {
   return obscenityMatcher.hasMatch(text);
 }
+
+export interface SentenceSpan {
+  startIndex: number;
+  endIndex: number;
+}
+
+export function segmentSentences(text: string): SentenceSpan[] {
+  const maskedText = createMaskedText(text);
+  const spans: SentenceSpan[] = [];
+  let sentenceStart = -1;
+
+  for (let i = 0; i < text.length; i++) {
+    const originalChar = text[i];
+    const maskedChar = maskedText[i];
+
+    if (originalChar === undefined || maskedChar === undefined) continue;
+
+    const isInEligibleZone = maskedChar === originalChar;
+    const isNonWhitespace = originalChar.trim() !== "";
+    const shouldStartSentence =
+      sentenceStart === -1 && isNonWhitespace && isInEligibleZone;
+
+    if (shouldStartSentence) {
+      sentenceStart = i;
+    }
+
+    const isPunctuationBoundary =
+      maskedChar === "." || maskedChar === "!" || maskedChar === "?";
+    const isNewlineBoundary = maskedChar === "\n";
+    const isSentenceBoundary = isPunctuationBoundary || isNewlineBoundary;
+
+    const shouldEndSentence = isSentenceBoundary && sentenceStart !== -1;
+
+    if (shouldEndSentence) {
+      let endIndex = i + 1;
+
+      if (isPunctuationBoundary && endIndex < text.length) {
+        const nextChar = maskedText[endIndex];
+        if (nextChar === "\n") {
+          endIndex++;
+        }
+      }
+
+      spans.push({
+        startIndex: sentenceStart,
+        endIndex,
+      });
+      sentenceStart = -1;
+      if (endIndex > i + 1) {
+        i = endIndex - 1;
+      }
+    }
+  }
+
+  if (sentenceStart !== -1) {
+    spans.push({
+      startIndex: sentenceStart,
+      endIndex: text.length,
+    });
+  }
+
+  return spans;
+}
