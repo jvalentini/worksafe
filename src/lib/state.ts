@@ -98,7 +98,7 @@ export async function processText(text: string) {
 }
 
 async function processLocally(text: string) {
-  const result = transformText(text);
+  const result = transformText(text, { sarcasmMode: sarcasmMode.value });
   transformedPlain.value = result.transformed;
   transformedEmail.value = formatAsEmail(result.transformed);
 
