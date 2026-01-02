@@ -123,10 +123,10 @@ describe("formatAsEmail", () => {
 });
 
 describe("getChangeSummary", () => {
-  test("summarizes counts by type", () => {
+  test("summarizes counts by type for clause rewrite", () => {
     const result = transformText("This is ridiculous");
     expect(getChangeSummary(result.changes)).toBe(
-      "Transformed 1 aggressive phrase",
+      "Transformed 1 frustration statement",
     );
   });
 
@@ -219,8 +219,240 @@ describe("protected tokens: URLs, @handles, #channels", () => {
   });
 });
 
+describe("clause rewrites: direct attack pattern", () => {
+  test("rewrites sentence with 'you + insult' pattern", () => {
+    const result = transformText("You are such an idiot.");
+
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+  });
+
+  test("rewrites sentence with 'your + insult' pattern", () => {
+    const result = transformText("Your stupid decisions are killing us.");
+
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+  });
+
+  test("rewrites multi-insult attack sentence", () => {
+    const result = transformText(
+      "You idiots are completely incompetent morons.",
+    );
+
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+  });
+
+  test("preserves protected tokens in attack sentences", () => {
+    const result = transformText(
+      "You stupid idiots need to check https://example.com/docs right now.",
+    );
+
+    expect(result.transformed).toContain("https://example.com/docs");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite attack in excluded zone (quoted email)", () => {
+    const result = transformText(
+      "> You idiots messed this up.\nI disagree with this assessment.",
+    );
+
+    expect(result.transformed).toContain("> You idiots messed this up.");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite attack in excluded zone (code block)", () => {
+    const result = transformText(
+      "```\nYou idiots broke the build.\n```\nPlease review.",
+    );
+
+    expect(result.transformed).toContain("You idiots broke the build.");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite attack in excluded zone (quoted email)", () => {
+    const result = transformText(
+      "> You idiots messed this up.\nI disagree with this assessment.",
+    );
+
+    // Quoted line should remain unchanged
+    expect(result.transformed).toContain("> You idiots messed this up.");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite attack in excluded zone (code block)", () => {
+    const result = transformText(
+      "```\nYou idiots broke the build.\n```\nPlease review.",
+    );
+
+    // Code block should remain unchanged
+    expect(result.transformed).toContain("You idiots broke the build.");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-attack"),
+    ).toBe(true);
+  });
+
+  test("groups consecutive attack sentences into one rewrite", () => {
+    const result = transformText(
+      "You are an idiot. Your stupid mistakes cost us.",
+    );
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+    expect(result.changes[0]?.original).toBe(
+      "You are an idiot. Your stupid mistakes cost us.",
+    );
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+  });
+});
+
+describe("clause rewrites: frustration pattern", () => {
+  test("rewrites 'this is + negative' frustration", () => {
+    const result = transformText("This is ridiculous.");
+
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+  });
+
+  test("rewrites 'that was + negative' frustration", () => {
+    const result = transformText("That was completely unacceptable.");
+
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+  });
+
+  test("rewrites 'it is + negative' frustration", () => {
+    const result = transformText("It is absolutely terrible.");
+
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+  });
+
+  test("rewrites with various negative descriptors", () => {
+    const negativeInputs = [
+      "This is absurd.",
+      "That was awful.",
+      "It is horrible.",
+      "This is garbage.",
+      "That was useless.",
+      "It is pathetic.",
+    ];
+
+    for (const input of negativeInputs) {
+      const result = transformText(input);
+      expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+      expect(result.transformed).toBe(
+        "This situation is concerning. I'd like to explore solutions to address it.",
+      );
+    }
+  });
+
+  test("preserves protected tokens in frustration sentences", () => {
+    const result = transformText(
+      "This is ridiculous @alice, check #general now.",
+    );
+
+    expect(result.transformed).toContain("@alice");
+    expect(result.transformed).toContain("#general");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-frustration"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite frustration in excluded zone (quoted email)", () => {
+    const result = transformText(
+      "> This is ridiculous.\nI understand your concern.",
+    );
+
+    expect(result.transformed).toContain("> This is ridiculous.");
+    expect(
+      result.changes.every((c) => c.type !== "clause-rewrite-frustration"),
+    ).toBe(true);
+  });
+
+  test("does not rewrite frustration in excluded zone (code fence)", () => {
+    const result = transformText(
+      "```python\n# This is terrible code\nprint('hello')\n```",
+    );
+
+    expect(result.transformed).toContain("This is terrible code");
+  });
+
+  test("groups consecutive frustration sentences into one rewrite", () => {
+    const result = transformText("This is awful. That was terrible.");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+    expect(result.changes[0]?.original).toBe(
+      "This is awful. That was terrible.",
+    );
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+  });
+});
+
+describe("clause rewrites: integration with word replacements", () => {
+  test("clause rewrite overrides word-level profanity replacement", () => {
+    const result = transformText("You are a fucking idiot.");
+
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+  });
+
+  test("word replacements apply when clause rewrite conditions not met", () => {
+    const result = transformText("That meeting was shit.");
+
+    expect(result.transformed).toContain("stuff");
+    expect(result.transformed).not.toContain("shit");
+    expect(result.changes[0]?.type).toBe("profanity");
+  });
+
+  test("clause rewrite + word replacement in different sentences", () => {
+    const result = transformText(
+      "You are stupid. The code is broken but fixable.",
+    );
+
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+    expect(result.transformed).toContain(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+  });
+});
+
 describe("integration: full text transformation", () => {
-  test("handles README example input", () => {
+  test("handles README example input with clause rewrites", () => {
     const input =
       "This is bullshit. Why can't you idiots figure this out? I'm sick of explaining the same shit.";
     const result = transformText(input);
@@ -228,9 +460,7 @@ describe("integration: full text transformation", () => {
     expect(result.transformed).not.toContain("bullshit");
     expect(result.transformed).not.toContain("idiots");
     expect(result.transformed).not.toContain("shit");
-    expect(result.transformed).toContain("nonsense");
-    expect(result.transformed).toContain("people");
-    expect(result.changeCount).toBeGreaterThanOrEqual(3);
+    expect(result.changeCount).toBeGreaterThanOrEqual(2);
   });
 
   test("handles mixed case profanity", () => {
@@ -303,5 +533,129 @@ describe("integration: full text transformation", () => {
 
     expect(result.transformed).toBe("   \n\t   ");
     expect(result.changeCount).toBe(0);
+  });
+});
+
+describe("M2: collapse consecutive negative sentences", () => {
+  test("groups 2 consecutive attack sentences", () => {
+    const result = transformText("You are an idiot. You are so stupid.");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+    expect(result.changes[0]?.original).toBe(
+      "You are an idiot. You are so stupid.",
+    );
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+  });
+
+  test("groups 3 consecutive frustration sentences", () => {
+    const result = transformText(
+      "This is ridiculous. That was awful. It is terrible.",
+    );
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-frustration");
+    expect(result.changes[0]?.original).toBe(
+      "This is ridiculous. That was awful. It is terrible.",
+    );
+    expect(result.transformed).toBe(
+      "This situation is concerning. I'd like to explore solutions to address it.",
+    );
+  });
+
+  test("groups mixed attack and frustration as attack", () => {
+    const result = transformText("You are an idiot. This is terrible.");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.type).toBe("clause-rewrite-attack");
+    expect(result.transformed).toBe(
+      "I'm concerned about this situation and would like to work through it together.",
+    );
+  });
+
+  test("does NOT group across quoted lines", () => {
+    const result = transformText(
+      "This is ridiculous.\n> You are an idiot.\nThat was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("> You are an idiot.");
+    const frustrationChanges = result.changes.filter(
+      (c) => c.type === "clause-rewrite-frustration",
+    );
+    expect(frustrationChanges).toHaveLength(2);
+  });
+
+  test("does NOT group across code fences", () => {
+    const result = transformText(
+      "This is ridiculous.\n```\ncode here\n```\nThat was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("```\ncode here\n```");
+    const frustrationChanges = result.changes.filter(
+      (c) => c.type === "clause-rewrite-frustration",
+    );
+    expect(frustrationChanges).toHaveLength(2);
+  });
+
+  test("does NOT group across protected tokens (URLs)", () => {
+    const result = transformText(
+      "This is ridiculous. Check https://example.com for details. That was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("https://example.com");
+  });
+
+  test("does NOT group across protected tokens (@handles)", () => {
+    const result = transformText(
+      "This is ridiculous. Ask @alice about this. That was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("@alice");
+  });
+
+  test("does NOT group across protected tokens (#channels)", () => {
+    const result = transformText(
+      "This is ridiculous. Post in #general please. That was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("#general");
+  });
+
+  test("does NOT group sentences with protected tokens embedded", () => {
+    const result = transformText(
+      "This is ridiculous @alice. That was terrible.",
+    );
+
+    expect(result.changeCount).toBe(1);
+    const frustrationChanges = result.changes.filter(
+      (c) => c.type === "clause-rewrite-frustration",
+    );
+    expect(frustrationChanges).toHaveLength(1);
+    expect(result.transformed).toContain("@alice");
+  });
+
+  test("groups sentences separated only by whitespace", () => {
+    const result = transformText("This is ridiculous.\n\nThat was terrible.");
+
+    expect(result.changeCount).toBe(1);
+    expect(result.changes[0]?.original).toBe(
+      "This is ridiculous.\n\nThat was terrible.",
+    );
+  });
+
+  test("does NOT group if normal text between them", () => {
+    const result = transformText(
+      "This is ridiculous. Some normal text here. That was terrible.",
+    );
+
+    expect(result.changeCount).toBe(2);
+    expect(result.transformed).toContain("Some normal text here.");
   });
 });
