@@ -1,6 +1,6 @@
 <template>
-  <div 
-    class="postit" 
+  <div
+    class="postit"
     :class="color"
     :style="{ transform: `rotate(${rotation}deg)` }"
   >
@@ -16,7 +16,7 @@ import { computed } from "vue";
 
 const props = withDefaults(
   defineProps<{
-    color?: "yellow" | "pink" | "blue" | "green" | "orange";
+    color?: "yellow" | "pink" | "blue" | "green" | "orange" | "red";
     rotate?: number;
   }>(),
   {
@@ -39,7 +39,7 @@ const rotation = computed(() => {
   font-size: 1rem;
   line-height: 1.5;
   min-width: 180px;
-  box-shadow: 
+  box-shadow:
     3px 4px 8px rgba(0,0,0,0.25),
     -1px -1px 0 rgba(255,255,255,0.5) inset;
 }
@@ -67,6 +67,11 @@ const rotation = computed(() => {
 .postit.orange {
   background: linear-gradient(145deg, #ff9a3c 0%, #ffb74d 60%, #ffa726 100%);
   color: #4e342e;
+}
+
+.postit.red {
+  background: linear-gradient(145deg, #ff8a8a 0%, #f78b8b 60%, #ef7070 100%);
+  color: #5d2020;
 }
 
 .postit-content {

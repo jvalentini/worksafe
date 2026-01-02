@@ -5,40 +5,40 @@
     <main class="main-content">
       <!-- Scattered Flair Pins -->
       <div class="flair-pins-scattered">
-        <FlairBadge 
-          emoji="☕" 
-          color="orange" 
+        <FlairBadge
+          emoji="☕"
+          color="orange"
           title="I need my coffee"
           class="flair-scattered flair-1"
         />
-        <FlairBadge 
-          emoji="📋" 
-          color="blue" 
+        <FlairBadge
+          emoji="📋"
+          color="blue"
           title="TPS Reports"
           class="flair-scattered flair-2"
         />
-        <FlairBadge 
-          emoji="💼" 
-          color="purple" 
+        <FlairBadge
+          emoji="💼"
+          color="purple"
           title="Case of the Mondays"
           class="flair-scattered flair-4"
         />
-        <FlairBadge 
-          emoji="🖨️" 
-          color="green" 
+        <FlairBadge
+          emoji="🖨️"
+          color="green"
           title="PC LOAD LETTER"
           class="flair-scattered flair-5"
         />
-        <FlairBadge 
-          emoji="⭐" 
-          color="yellow" 
+        <FlairBadge
+          emoji="⭐"
+          color="yellow"
           title="15 pieces of flair!"
           class="flair-scattered flair-6"
         />
       </div>
 
       <div class="input-section">
-        <PostItNote color="yellow" :rotate="-2">
+        <PostItNote color="red" :rotate="-2">
           <strong>📝 INPUT</strong><br/>
           Speak or type your raw text
         </PostItNote>

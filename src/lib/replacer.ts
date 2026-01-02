@@ -87,6 +87,8 @@ export function getChangeSummary(changes: Detection[]): string {
     "persuasion-commitments": 0,
     "persuasion-validation": 0,
     "persuasion-followups": 0,
+    "clause-rewrite-attack": 0,
+    "clause-rewrite-frustration": 0,
   };
 
   for (const change of changes) {
@@ -111,6 +113,16 @@ export function getChangeSummary(changes: Detection[]): string {
   if (typeCounts["passive-aggressive"] > 0) {
     parts.push(
       `${typeCounts["passive-aggressive"]} passive-aggressive phrase${typeCounts["passive-aggressive"] > 1 ? "s" : ""}`,
+    );
+  }
+  if (typeCounts["clause-rewrite-attack"] > 0) {
+    parts.push(
+      `${typeCounts["clause-rewrite-attack"]} direct attack${typeCounts["clause-rewrite-attack"] > 1 ? "s" : ""}`,
+    );
+  }
+  if (typeCounts["clause-rewrite-frustration"] > 0) {
+    parts.push(
+      `${typeCounts["clause-rewrite-frustration"]} frustration statement${typeCounts["clause-rewrite-frustration"] > 1 ? "s" : ""}`,
     );
   }
 
