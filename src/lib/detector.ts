@@ -54,6 +54,63 @@ const extraWhitelistedTerms = [
   "assessors",
 ];
 
+const ENABLE_FUZZY_MATCHING = true;
+const MAX_FUZZY_EDIT_DISTANCE = 1;
+const MIN_FUZZY_MATCH_LENGTH = 3;
+const MAX_FUZZY_LENGTH_DIFF = 1;
+
+const HIGH_IMPACT_FUZZY_MATCH_TERMS = new Set([
+  "fuck",
+  "fucking",
+  "shit",
+  "bullshit",
+  "asshole",
+  "damn",
+  "hell",
+  "bitch",
+  "bastard",
+  "crap",
+]);
+
+const SAFE_WORDS_BLACKLIST = new Set([
+  "is",
+  "it",
+  "on",
+  "the",
+  "a",
+  "an",
+  "we",
+  "he",
+  "she",
+  "they",
+  "s",
+  "t",
+  "ship",
+  "ships",
+  "assess",
+  "assessed",
+  "assesses",
+  "assessing",
+  "assessment",
+  "assessments",
+  "assessor",
+  "assessors",
+  "asset",
+  "assets",
+  "shell",
+  "shells",
+  "craft",
+  "crafts",
+  "bass",
+  "class",
+  "glass",
+  "mass",
+  "pass",
+  "grass",
+  "funk",
+  "funky",
+]);
+
 const obscenityMatcher = new RegExpMatcher({
   ...baseDataset,
   ...englishRecommendedTransformers,
@@ -206,10 +263,16 @@ export function detectIssues(
 
   for (const word of words) {
     const lowerWord = word.toLowerCase();
-    const replacement = allWordReplacements[lowerWord];
+    let replacement = allWordReplacements[lowerWord];
+
+    if (!replacement && ENABLE_FUZZY_MATCHING && /^[a-z]+$/i.test(word)) {
+      const fuzzyMatch = findClosestReplacement(lowerWord);
+      if (fuzzyMatch) {
+        replacement = fuzzyMatch;
+      }
+    }
 
     if (replacement) {
-      // Extract original word from original text using indices
       const originalWord = text.slice(position, position + word.length);
       const wordType = getWordType(lowerWord);
       addCandidate({
@@ -441,6 +504,58 @@ function rangesOverlap(
   return aStart < bEnd && bStart < aEnd;
 }
 
+function levenshteinDistance(a: string, b: string): number {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+
+  const matrix: number[][] = [];
+
+  for (let i = 0; i <= b.length; i++) {
+    matrix[i] = [i];
+  }
+
+  for (let j = 0; j <= a.length; j++) {
+    if (matrix[0]) {
+      matrix[0][j] = j;
+    }
+  }
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      const cost = b.charAt(i - 1) === a.charAt(j - 1) ? 0 : 1;
+      const row = matrix[i];
+      const prevRow = matrix[i - 1];
+
+      if (row && prevRow) {
+        const deletion = (prevRow[j] ?? 0) + 1;
+        const insertion = (row[j - 1] ?? 0) + 1;
+        const substitution = (prevRow[j - 1] ?? 0) + cost;
+
+        row[j] = Math.min(deletion, insertion, substitution);
+      }
+    }
+  }
+
+  const lastRow = matrix[b.length];
+  return lastRow?.[a.length] ?? Number.MAX_SAFE_INTEGER;
+}
+
+function isSubstringOfSafeWord(word: string, targetTerm: string): boolean {
+  const safeWords = extraWhitelistedTerms;
+
+  for (const safeWord of safeWords) {
+    const lowerSafeWord = safeWord.toLowerCase();
+    if (
+      lowerSafeWord.includes(word.toLowerCase()) &&
+      lowerSafeWord !== word.toLowerCase()
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 function findClosestReplacement(word: string): string | null {
   const cleaned = word.replace(/[^a-z]/g, "");
 
@@ -448,10 +563,53 @@ function findClosestReplacement(word: string): string | null {
     return null;
   }
 
+  const cleanedLower = cleaned.toLowerCase();
+
+  if (SAFE_WORDS_BLACKLIST.has(cleanedLower)) {
+    return null;
+  }
+
+  if (
+    extraWhitelistedTerms.some((term) => term.toLowerCase() === cleanedLower)
+  ) {
+    return null;
+  }
+
   for (const [key, value] of Object.entries(allWordReplacements)) {
     if (cleaned.includes(key) || key.includes(cleaned)) {
       return value;
     }
+  }
+
+  if (!ENABLE_FUZZY_MATCHING) {
+    return null;
+  }
+
+  if (cleaned.length < MIN_FUZZY_MATCH_LENGTH) {
+    return null;
+  }
+
+  let bestMatch: { key: string; distance: number } | null = null;
+
+  for (const term of HIGH_IMPACT_FUZZY_MATCH_TERMS) {
+    const lengthDiff = Math.abs(cleaned.length - term.length);
+    if (lengthDiff > MAX_FUZZY_LENGTH_DIFF) {
+      continue;
+    }
+
+    const distance = levenshteinDistance(cleaned, term);
+
+    if (distance <= MAX_FUZZY_EDIT_DISTANCE && distance > 0) {
+      if (bestMatch === null || distance < bestMatch.distance) {
+        if (!isSubstringOfSafeWord(cleaned, term)) {
+          bestMatch = { key: term, distance };
+        }
+      }
+    }
+  }
+
+  if (bestMatch) {
+    return allWordReplacements[bestMatch.key] ?? null;
   }
 
   return null;

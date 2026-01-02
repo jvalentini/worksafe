@@ -189,6 +189,65 @@ describe("excluded zone masking", () => {
   });
 });
 
+describe("constrained fuzzy matching", () => {
+  test("detects common typos with edit distance 1 - fuk", () => {
+    const detections = detectIssues("This is fuk");
+
+    expect(detections).toHaveLength(1);
+    expect(detections[0]?.original).toBe("fuk");
+    expect(detections[0]?.type).toBe("profanity");
+    expect(detections[0]?.replacement).toBe("heck");
+  });
+
+  test("detects common typos with edit distance 1 - shlt", () => {
+    const detections = detectIssues("This shlt is broken");
+
+    expect(detections).toHaveLength(1);
+    expect(detections[0]?.original).toBe("shlt");
+    expect(detections[0]?.type).toBe("profanity");
+    expect(detections[0]?.replacement).toBe("stuff");
+  });
+
+  test("detects common typos with edit distance 1 - dmn", () => {
+    const detections = detectIssues("dmn it");
+
+    expect(detections).toHaveLength(1);
+    expect(detections[0]?.original).toBe("dmn");
+    expect(detections[0]?.type).toBe("profanity");
+    expect(detections[0]?.replacement).toBe("darn");
+  });
+
+  test("does NOT match safe words - assess", () => {
+    const detections = detectIssues("We need to assess the situation");
+
+    expect(detections).toEqual([]);
+  });
+
+  test("does NOT match safe words - asset", () => {
+    const detections = detectIssues("This is a valuable asset");
+
+    expect(detections).toEqual([]);
+  });
+
+  test("does NOT match safe words - shell", () => {
+    const detections = detectIssues("Run the shell command");
+
+    expect(detections).toEqual([]);
+  });
+
+  test("does NOT match safe words - craft", () => {
+    const detections = detectIssues("Let's craft a solution");
+
+    expect(detections).toEqual([]);
+  });
+
+  test("does NOT match words with edit distance > 1", () => {
+    const detections = detectIssues("This is funk music");
+
+    expect(detections).toEqual([]);
+  });
+});
+
 describe("segmentSentences", () => {
   test("segments simple sentences", () => {
     const { segmentSentences } = require("./detector");
