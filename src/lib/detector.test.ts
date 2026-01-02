@@ -8,7 +8,7 @@ describe("detectIssues", () => {
       {
         type: "profanity",
         original: "asshole",
-        replacement: "jerk",
+        replacement: "friend",
         startIndex: 0,
         endIndex: 7,
       },
@@ -63,7 +63,7 @@ describe("detectIssues", () => {
     expect(detections.map((d) => d.replacement)).toEqual([
       "freaking",
       "nonsense",
-      "jerk",
+      "friend",
     ]);
   });
 

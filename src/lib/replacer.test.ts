@@ -437,12 +437,12 @@ describe("table-driven baseline transformations", () => {
     {
       name: "multiple profanity replacements",
       input: "fucking bullshit asshole",
-      expectedExact: "freaking nonsense jerk",
+      expectedExact: "freaking nonsense friend",
     },
     {
       name: "insult word replacement",
       input: "Those idiots are stupid",
-      expectedContains: ["people", "misguided"],
+      expectedContains: ["friends", "misguided"],
       expectedNotContains: ["idiots", "stupid"],
       expectedMinChangeCount: 2,
     },
@@ -480,7 +480,7 @@ describe("transformText", () => {
   test("transforms profanity and returns change metadata", () => {
     const result = transformText("fucking bullshit asshole");
 
-    expect(result.transformed).toBe("freaking nonsense jerk");
+    expect(result.transformed).toBe("freaking nonsense friend");
     expect(result.changeCount).toBe(3);
     expect(result.changes.map((c) => c.original)).toEqual([
       "fucking",
@@ -1020,7 +1020,7 @@ describe("integration: full text transformation", () => {
   test("handles insults in sentences", () => {
     const result = transformText("These idiots keep making stupid decisions");
 
-    expect(result.transformed).toContain("people");
+    expect(result.transformed).toContain("friends");
     expect(result.transformed).toContain("misguided");
     expect(result.changeCount).toBe(2);
   });
