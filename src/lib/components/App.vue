@@ -49,25 +49,8 @@
           Speak or type your raw text
         </PostItNote>
 
-        <div class="input-tabs">
-          <button 
-            class="tab-btn" 
-            :class="{ active: inputMode === 'voice' }"
-            @click="setInputMode('voice')"
-          >
-            🎤 VOICE INPUT
-          </button>
-          <button 
-            class="tab-btn" 
-            :class="{ active: inputMode === 'text' }"
-            @click="setInputMode('text')"
-          >
-            ⌨️ TEXT INPUT
-          </button>
-        </div>
-
-        <VoiceInput />
-        <TextInput />
+        <VoiceInput @switch-mode="setInputMode" />
+        <TextInput @switch-mode="setInputMode" />
       </div>
 
       <SettingsPanel />
@@ -201,38 +184,7 @@ onMounted(() => {
   display: inline-block;
 }
 
-.input-tabs {
-  display: flex;
-  gap: 0;
-}
 
-.tab-btn {
-  flex: 1;
-  padding: 0.875rem 1rem;
-  font-family: 'VT323', monospace;
-  font-size: 1.1rem;
-  letter-spacing: 0.1em;
-  background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 100%);
-  color: #a8a8a8;
-  border: 2px solid #4a4a4a;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.tab-btn:first-child {
-  border-right: none;
-}
-
-.tab-btn.active {
-  background: linear-gradient(180deg, #b22222 0%, #8b0000 100%);
-  color: white;
-  border-color: #8b0000;
-}
-
-.tab-btn:hover:not(.active) {
-  background: linear-gradient(180deg, #6a6a6a 0%, #5a5a5a 100%);
-  color: #c9b896;
-}
 
 .output-section {
   margin-top: 2rem;

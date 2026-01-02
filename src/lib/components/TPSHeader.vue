@@ -5,28 +5,53 @@
     <div class="header-content">
       <div class="logo-area">
         <div class="logo-badge">
-          <svg class="stapler-svg" viewBox="0 0 80 60" xmlns="http://www.w3.org/2000/svg">
-            <!-- Stapler body (top part) -->
-            <path d="M 10 15 L 70 15 L 70 25 L 10 25 Z" fill="#8b0000" stroke="#5a0000" stroke-width="1"/>
-            <path d="M 10 15 L 70 15 L 68 12 L 12 12 Z" fill="#b71c1c"/>
+          <svg class="stapler-svg" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
+            <!-- Main body shadow -->
+            <ellipse cx="50" cy="62" rx="42" ry="6" fill="rgba(0,0,0,0.15)"/>
             
-            <!-- Stapler base -->
-            <path d="M 5 25 L 75 25 L 75 35 L 5 35 Z" fill="#c62828" stroke="#5a0000" stroke-width="1"/>
-            <path d="M 5 25 L 75 25 L 73 22 L 7 22 Z" fill="#dc143c"/>
+            <!-- Base plate (bottom) -->
+            <path d="M 12 48 L 88 48 L 88 56 L 12 56 Z" fill="#6d1919" stroke="#3d0000" stroke-width="0.5"/>
+            <path d="M 12 48 L 88 48 L 87 45 L 13 45 Z" fill="#8b0000"/>
             
-            <!-- Stapler bottom -->
-            <rect x="8" y="35" width="64" height="8" fill="#8b0000" stroke="#5a0000" stroke-width="1"/>
+            <!-- Lower body section -->
+            <path d="M 15 32 L 85 32 L 88 48 L 12 48 Z" fill="#b71c1c" stroke="#5a0000" stroke-width="0.8"/>
+            <path d="M 15 32 L 85 32 L 84 29 L 16 29 Z" fill="#dc143c"/>
             
-            <!-- Metal spring/hinge -->
-            <circle cx="15" cy="30" r="3" fill="#808080" stroke="#404040" stroke-width="0.5"/>
-            <circle cx="65" cy="30" r="3" fill="#808080" stroke="#404040" stroke-width="0.5"/>
+            <!-- Upper body/lid section -->
+            <path d="M 18 18 L 82 18 L 85 32 L 15 32 Z" fill="#8b0000" stroke="#5a0000" stroke-width="0.8"/>
+            <path d="M 18 18 L 82 18 L 81 15 L 19 15 Z" fill="#b22222"/>
             
-            <!-- Stapler details/shadows -->
-            <rect x="20" y="17" width="40" height="2" fill="#5a0000" opacity="0.3"/>
-            <rect x="12" y="27" width="56" height="2" fill="#5a0000" opacity="0.3"/>
+            <!-- Top highlight ridge -->
+            <rect x="22" y="16" width="56" height="3" fill="#dc143c" opacity="0.6" rx="0.5"/>
             
-            <!-- Highlight -->
-            <rect x="15" y="16" width="45" height="3" fill="#ff6b6b" opacity="0.4"/>
+            <!-- Metal hinge mechanism (left) -->
+            <circle cx="20" cy="32" r="4" fill="#a0a0a0" stroke="#505050" stroke-width="0.8"/>
+            <circle cx="20" cy="32" r="2.5" fill="#707070"/>
+            <circle cx="19" cy="31" r="1" fill="#d0d0d0"/>
+            
+            <!-- Metal hinge mechanism (right) -->
+            <circle cx="80" cy="32" r="4" fill="#a0a0a0" stroke="#505050" stroke-width="0.8"/>
+            <circle cx="80" cy="32" r="2.5" fill="#707070"/>
+            <circle cx="79" cy="31" r="1" fill="#d0d0d0"/>
+            
+            <!-- Spring/mechanism detail -->
+            <path d="M 16 36 L 14 42" stroke="#404040" stroke-width="1.5" fill="none"/>
+            <path d="M 84 36 L 86 42" stroke="#404040" stroke-width="1.5" fill="none"/>
+            
+            <!-- Stapler depth shadows -->
+            <rect x="18" y="22" width="64" height="2" fill="#5a0000" opacity="0.4"/>
+            <rect x="16" y="36" width="68" height="1.5" fill="#5a0000" opacity="0.3"/>
+            <rect x="13" y="50" width="74" height="1.5" fill="#3d0000" opacity="0.4"/>
+            
+            <!-- Brand plate (Swingline 747) -->
+            <rect x="35" y="25" width="30" height="5" fill="rgba(0,0,0,0.2)" rx="0.5"/>
+            <text x="50" y="29.5" font-family="Arial, sans-serif" font-size="3.5" font-weight="bold" fill="#ffffff" text-anchor="middle" opacity="0.6">SWINGLINE</text>
+            
+            <!-- Light reflection on top -->
+            <rect x="25" y="17" width="35" height="2" fill="#ff8a8a" opacity="0.5" rx="1"/>
+            
+            <!-- Edge highlights for 3D effect -->
+            <path d="M 18 18 L 19 15 L 81 15 L 82 18" fill="none" stroke="#ff6b6b" stroke-width="0.5" opacity="0.6"/>
           </svg>
         </div>
         <div class="logo-text">

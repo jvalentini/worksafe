@@ -1,12 +1,28 @@
 <template>
   <div class="voice-panel" v-show="inputMode === 'voice'">
-    <div class="panel-header">
-      <span class="panel-id">FORM 01</span>
-      <span class="panel-title">VOICE INPUT TERMINAL</span>
-      <span class="panel-status" :class="{ recording: isRecording }">
-        {{ isRecording ? '● REC' : '○ STANDBY' }}
-      </span>
+    <div class="tab-switcher">
+      <button 
+        class="tab-btn active"
+        @click="emit('switch-mode', 'voice')"
+      >
+        🎤 VOICE INPUT
+      </button>
+      <button 
+        class="tab-btn"
+        @click="emit('switch-mode', 'text')"
+      >
+        ⌨️ TEXT INPUT
+      </button>
     </div>
+
+    <div class="panel-content">
+      <div class="panel-header">
+        <span class="panel-id">FORM 01</span>
+        <span class="panel-title">VOICE INPUT TERMINAL</span>
+        <span class="panel-status" :class="{ recording: isRecording }">
+          {{ isRecording ? '● REC' : '○ STANDBY' }}
+        </span>
+      </div>
 
     <div class="crt-monitor">
       <div class="crt-bezel">
@@ -40,6 +56,7 @@
       </div>
       <p class="transcript-text">{{ liveTranscript }}</p>
     </div>
+    </div>
   </div>
 </template>
 
@@ -52,6 +69,10 @@ import {
   voiceStatus,
   liveTranscript,
 } from "$lib/state";
+
+const emit = defineEmits<{
+  "switch-mode": [mode: "voice" | "text"];
+}>();
 
 const waveformCanvas = ref<HTMLCanvasElement | null>(null);
 let animationId: number | null = null;
@@ -135,12 +156,12 @@ onUnmounted(() => {
 .voice-panel {
   background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
   border: none;
-  padding: 1.5rem;
   position: relative;
   box-shadow: 
     3px 4px 8px rgba(0,0,0,0.25),
     -1px -1px 0 rgba(255,255,255,0.5) inset;
   transform: rotate(-1deg);
+  margin-bottom: 1rem;
 }
 
 .voice-panel::before {
@@ -151,6 +172,7 @@ onUnmounted(() => {
   right: 0;
   height: 6px;
   background: rgba(0,0,0,0.08);
+  z-index: 1;
 }
 
 .voice-panel::after {
@@ -163,6 +185,50 @@ onUnmounted(() => {
   border-style: solid;
   border-width: 0 0 25px 25px;
   border-color: transparent transparent rgba(0,0,0,0.15) transparent;
+}
+
+.tab-switcher {
+  display: flex;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  font-family: 'Special Elite', monospace;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  background: rgba(93,64,55,0.15);
+  color: rgba(93,64,55,0.6);
+  border: none;
+  border-bottom: 2px dashed rgba(93,64,55,0.2);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.tab-btn:first-child {
+  border-right: 1px dashed rgba(93,64,55,0.15);
+}
+
+.tab-btn.active {
+  background: transparent;
+  color: #5d4037;
+  border-bottom: none;
+  font-size: 1rem;
+  padding-bottom: 0.95rem;
+}
+
+.tab-btn:not(.active):hover {
+  background: rgba(93,64,55,0.1);
+  color: rgba(93,64,55,0.8);
+}
+
+.panel-content {
+  padding: 1.5rem;
 }
 
 .panel-header {

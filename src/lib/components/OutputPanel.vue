@@ -191,7 +191,7 @@ async function copyText(text: string) {
 .output-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .tab-btn {
@@ -207,6 +207,8 @@ async function copyText(text: string) {
   cursor: pointer;
   transition: all 0.15s;
   box-shadow: 1px 0 3px rgba(0,0,0,0.1);
+  position: relative;
+  z-index: 1;
 }
 
 .tab-btn:first-child {
@@ -217,6 +219,7 @@ async function copyText(text: string) {
   background: rgba(255,255,255,0.6);
   color: #5d4037;
   font-weight: bold;
+  z-index: 2;
 }
 
 .tab-btn:hover:not(.active) {
@@ -225,6 +228,7 @@ async function copyText(text: string) {
 
 .output-document {
   margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .document-paper {

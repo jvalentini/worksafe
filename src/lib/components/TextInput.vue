@@ -1,10 +1,26 @@
 <template>
   <div class="text-panel" v-show="inputMode === 'text'">
-    <div class="panel-header">
-      <span class="panel-id">FORM 02</span>
-      <span class="panel-title">RAW INPUT DOCUMENT</span>
-      <span class="panel-badge">* REQUIRED</span>
+    <div class="tab-switcher">
+      <button 
+        class="tab-btn"
+        @click="emit('switch-mode', 'voice')"
+      >
+        🎤 VOICE INPUT
+      </button>
+      <button 
+        class="tab-btn active"
+        @click="emit('switch-mode', 'text')"
+      >
+        ⌨️ TEXT INPUT
+      </button>
     </div>
+
+    <div class="panel-content">
+      <div class="panel-header">
+        <span class="panel-id">FORM 02</span>
+        <span class="panel-title">RAW INPUT DOCUMENT</span>
+        <span class="panel-badge">* REQUIRED</span>
+      </div>
     
     <div class="form-field">
       <label for="raw-input" class="field-label">ENTER UNPROFESSIONAL TEXT BELOW:</label>
@@ -38,11 +54,16 @@
         <kbd>CTRL</kbd>+<kbd>ENTER</kbd>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { processText, textInput, inputMode, isProcessing } from "$lib/state";
+
+const emit = defineEmits<{
+  "switch-mode": [mode: "voice" | "text"];
+}>();
 
 function handleKeyDown(e: KeyboardEvent) {
   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
@@ -60,12 +81,12 @@ function handleTransform() {
 .text-panel {
   background: linear-gradient(145deg, #fff740 0%, #fff176 60%, #ffee58 100%);
   border: none;
-  padding: 1.5rem;
   position: relative;
   box-shadow: 
     3px 4px 8px rgba(0,0,0,0.25),
     -1px -1px 0 rgba(255,255,255,0.5) inset;
   transform: rotate(0.5deg);
+  margin-bottom: 1rem;
 }
 
 .text-panel::before {
@@ -76,6 +97,7 @@ function handleTransform() {
   right: 0;
   height: 6px;
   background: rgba(0,0,0,0.08);
+  z-index: 1;
 }
 
 .text-panel::after {
@@ -88,6 +110,50 @@ function handleTransform() {
   border-style: solid;
   border-width: 0 0 25px 25px;
   border-color: transparent transparent rgba(0,0,0,0.15) transparent;
+}
+
+.tab-switcher {
+  display: flex;
+  gap: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  font-family: 'Special Elite', monospace;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  background: rgba(93,64,55,0.15);
+  color: rgba(93,64,55,0.6);
+  border: none;
+  border-bottom: 2px dashed rgba(93,64,55,0.2);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+
+.tab-btn:first-child {
+  border-right: 1px dashed rgba(93,64,55,0.15);
+}
+
+.tab-btn.active {
+  background: transparent;
+  color: #5d4037;
+  border-bottom: none;
+  font-size: 1rem;
+  padding-bottom: 0.95rem;
+}
+
+.tab-btn:not(.active):hover {
+  background: rgba(93,64,55,0.1);
+  color: rgba(93,64,55,0.8);
+}
+
+.panel-content {
+  padding: 1.5rem;
 }
 
 .panel-header {
