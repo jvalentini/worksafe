@@ -1,6 +1,5 @@
-import { mount } from "svelte";
-
-import App from "$lib/components/App.svelte";
+import { createApp } from "vue";
+import App from "$lib/components/App.vue";
 
 const target = document.getElementById("app");
 
@@ -8,6 +7,4 @@ if (!target) {
   throw new Error("Missing #app mount element");
 }
 
-const app = mount(App, { target });
-
-export default app;
+createApp(App).mount(target);

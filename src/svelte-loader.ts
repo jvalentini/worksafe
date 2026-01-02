@@ -47,6 +47,7 @@ export function createSvelteLoader(
           console.error("Svelte compilation error:", message);
           throw new Error(
             `Failed to compile Svelte component (${cleanPath}): ${message}`,
+            { cause: error },
           );
         }
       });

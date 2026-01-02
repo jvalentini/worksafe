@@ -10,13 +10,12 @@
     "preview": "vite preview",
     "serve": "NODE_ENV=production bun src/server.ts",
     "lint": "biome check src && oxlint src",
-    "lint:fix": "biome check --write src",
+    "lint:fix": "biome check --write --unsafe src && oxlint --fix src",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
-    "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@types/bun": "latest",
     "lefthook": "^2.0.13",
     "oxlint": "^1.36.0"
@@ -26,8 +25,10 @@
   },
   "dependencies": {
     "@types/node": "^25.0.3",
+    "@vitejs/plugin-vue": "^6.0.3",
     "obscenity": "^0.4.5",
     "svelte": "^5.46.1",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "vue": "^3.5.26"
   }
 }

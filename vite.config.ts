@@ -1,25 +1,19 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
-import { svelte } from "@sveltejs/vite-plugin-svelte";
+import vue from "@vitejs/plugin-vue";
 
 export default defineConfig({
   root: "src",
-  plugins: [
-    svelte({
-      configFile: resolve(__dirname, "svelte.config.js"),
-    }),
-  ],
+  plugins: [vue()],
   build: {
     outDir: "../dist",
     emptyOutDir: true,
-    // Optimize for production
     minify: true,
     sourcemap: true,
   },
   server: {
     port: 3000,
     open: true,
-    // Enable HMR
     hmr: true,
   },
   resolve: {
