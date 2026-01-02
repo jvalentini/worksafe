@@ -65,4 +65,40 @@ describe("detectIssues", () => {
       "jerk",
     ]);
   });
+
+  test("replaces hedging phrases with persuasion alternatives", () => {
+    expect(detectIssues("I think we should ship")).toEqual([
+      {
+        type: "persuasion-hedging",
+        original: "I think we should",
+        replacement: "I recommend we",
+        startIndex: 0,
+        endIndex: 17,
+      },
+    ]);
+  });
+
+  test("does not incorrectly capitalize mid-sentence phrase replacements", () => {
+    expect(detectIssues("and I believe this works")).toEqual([
+      {
+        type: "persuasion-hedging",
+        original: "I believe",
+        replacement: "the evidence suggests",
+        startIndex: 4,
+        endIndex: 13,
+      },
+    ]);
+  });
+
+  test("categorizes follow-up phrases under persuasion", () => {
+    expect(detectIssues("Just checking in on the status")).toEqual([
+      {
+        type: "persuasion-followups",
+        original: "Just checking in",
+        replacement: "Following up",
+        startIndex: 0,
+        endIndex: 16,
+      },
+    ]);
+  });
 });
