@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-const currentDate = computed(() => {
+const _currentDate = computed(() => {
   return new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -56,7 +56,7 @@ const currentDate = computed(() => {
   });
 });
 
-const reportNumber = computed(() => {
+const _reportNumber = computed(() => {
   return Date.now().toString().slice(-6);
 });
 </script>

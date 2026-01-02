@@ -62,22 +62,16 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from "vue";
-import {
-  toggleRecording as doToggleRecording,
-  isRecording,
-  inputMode,
-  voiceStatus,
-  liveTranscript,
-} from "$lib/state";
+import { toggleRecording as doToggleRecording, isRecording } from "$lib/state";
 
-const emit = defineEmits<{
+const _emit = defineEmits<{
   "switch-mode": [mode: "voice" | "text"];
 }>();
 
 const waveformCanvas = ref<HTMLCanvasElement | null>(null);
 let animationId: number | null = null;
 
-const currentTime = computed(() => new Date().toLocaleTimeString());
+const _currentTime = computed(() => new Date().toLocaleTimeString());
 
 function drawWaveform() {
   const canvas = waveformCanvas.value;
@@ -139,7 +133,7 @@ function animate() {
   animationId = requestAnimationFrame(animate);
 }
 
-function toggleRecording() {
+function _toggleRecording() {
   doToggleRecording();
 }
 

@@ -35,7 +35,7 @@ const colorMap: Record<string, [string, string]> = {
   orange: ["#fb8c00", "#e65100"],
 };
 
-const gradientStyle = computed(() => {
+const _gradientStyle = computed(() => {
   const [light, dark] = colorMap[props.color] || colorMap.red;
   return `linear-gradient(180deg, ${light} 0%, ${dark} 100%)`;
 });

@@ -64,7 +64,7 @@ const allWordReplacements: Record<string, string> = {
   ...insultReplacements,
 };
 
-const allWordKeys = Object.keys(allWordReplacements).sort(
+const allWordKeys = Object.keys(allWordReplacements).toSorted(
   (a, b) => b.length - a.length,
 );
 

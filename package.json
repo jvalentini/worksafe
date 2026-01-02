@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "serve": "NODE_ENV=production bun src/server.ts",
     "lint": "biome check src && oxlint src",
-    "lint:fix": "biome check --write src",
+    "lint:fix": "biome check --write --unsafe src && oxlint --fix src",
     "typecheck": "tsc --noEmit",
     "test": "bun test"
   },
