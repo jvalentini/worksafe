@@ -23,45 +23,16 @@ export async function startServer(
 
   if (isDevelopment) {
     // Development mode: use Bun's dev server with HMR
-    const srcDir = new URL("./", import.meta.url);
-    const indexFileUrl = new URL("./index.html", srcDir);
+    // Import the HTML file directly so Bun can transform it with /_bun/asset/ paths
+    const indexHtml = await import("./index.html");
 
     const server = Bun.serve({
       port,
       development: {
         hmr: true,
       },
-      async fetch(req) {
-        const url = new URL(req.url);
-
-        let pathname: string;
-        try {
-          pathname = decodeURIComponent(url.pathname);
-        } catch {
-          return new Response("Bad Request", { status: 400 });
-        }
-
-        // Security: prevent path traversal
-        if (pathname.includes("\0") || pathname.includes("..")) {
-          return new Response("Bad Request", { status: 400 });
-        }
-
-        // Serve index.html for root
-        if (pathname === "/") {
-          const indexFile = Bun.file(indexFileUrl);
-          if (await indexFile.exists()) {
-            return new Response(indexFile);
-          }
-        }
-
-        // Let Bun handle other requests (assets, HMR, etc.)
-        const fileUrl = new URL(`.${pathname}`, srcDir);
-        const file = Bun.file(fileUrl);
-        if (await file.exists()) {
-          return new Response(file);
-        }
-
-        return new Response("Not Found", { status: 404 });
+      routes: {
+        "/": indexHtml,
       },
     });
 
