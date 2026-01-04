@@ -6,7 +6,7 @@
         <div class="pin-border">
           <div class="pin-inner">
             <img 
-              src="/lundberg.png" 
+              src="/lumbergh.png" 
               alt="Bill Lumbergh" 
               class="lumbergh-face"
             />

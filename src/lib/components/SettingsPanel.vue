@@ -8,7 +8,7 @@
 
     <!-- Settings content -->
     <div class="settings-content" :class="{ open: drawerOpen }">
-      <!-- Lundberg AI Toggle -->
+      <!-- Lumbergh AI Toggle -->
       <div class="control-section">
         <label class="ai-toggle" :class="{ active: aiMode }" @click="toggleAiMode">
           <input
@@ -20,7 +20,7 @@
 
           <div class="toggle-circle" :class="{ active: aiMode }">
             <img
-              src="/lundberg.png"
+              src="/lumbergh.png"
               alt="Bill Lumbergh"
               class="lumbergh-photo"
             />
@@ -30,7 +30,7 @@
         </label>
 
         <p class="control-hint">
-          Lundberg AI {{ aiMode ? 'Enabled' : 'Disabled' }}
+          Lumbergh AI {{ aiMode ? 'Enabled' : 'Disabled' }}
         </p>
       </div>
 
@@ -155,7 +155,7 @@ function handleSaveKey() {
   margin-bottom: 0.75rem;
 }
 
-/* Lundberg AI Toggle */
+/* Lumbergh AI Toggle */
 .ai-toggle {
   display: flex;
   flex-direction: column;
