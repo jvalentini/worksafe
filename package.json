@@ -1,6 +1,6 @@
 {
   "name": "worksafe",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Transform profanity and non-PC words into professional communication",
   "type": "module",
   "private": true,

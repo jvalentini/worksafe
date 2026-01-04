@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-01-04
+
 ### Added
 - Complete offline rewriting with enhanced detection and UI improvements (#8) — thanks @jvalentini
   - Advanced profanity/insult detection with fuzzy matching
