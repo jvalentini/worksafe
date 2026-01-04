@@ -1,5 +1,25 @@
 # WorkSafe
 
+<div align="center">
+
+<img src="banner.png" alt="WorkSafe banner" width="800">
+
+[![CI](https://github.com/jvalentini/worksafe/actions/workflows/ci.yml/badge.svg)](https://github.com/jvalentini/worksafe/actions/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vue](https://img.shields.io/badge/Vue-3.5-42b883?logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.3-646cff?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Bun](https://img.shields.io/badge/Bun-1.2-black?logo=bun&logoColor=white)](https://bun.sh/)
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/jvalentini/worksafe/blob/main/LICENSE)
+[![Code Size](https://img.shields.io/github/languages/code-size/jvalentini/worksafe)](https://github.com/jvalentini/worksafe)
+[![GitHub Stars](https://img.shields.io/github/stars/jvalentini/worksafe?style=flat)](https://github.com/jvalentini/worksafe)
+
+[![Chrome](https://img.shields.io/badge/Chrome-supported-brightgreen?logo=googlechrome&logoColor=white)](https://worksafe.jvalentini.dev)
+[![Edge](https://img.shields.io/badge/Edge-supported-brightgreen?logo=microsoftedge&logoColor=white)](https://worksafe.jvalentini.dev)
+[![Firefox](https://img.shields.io/badge/Firefox-supported-brightgreen?logo=firefox&logoColor=white)](https://worksafe.jvalentini.dev)
+[![Safari](https://img.shields.io/badge/Safari-supported-brightgreen?logo=safari&logoColor=white)](https://worksafe.jvalentini.dev)
+
+</div>
+
 Transform profanity and unprofessional language into workplace-appropriate communication.
 
 ## What It Does
